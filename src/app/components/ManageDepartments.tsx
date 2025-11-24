@@ -34,8 +34,8 @@ export default function ManageDepartments({ isOpen, onClose }: ManageDepartments
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           query: `
             query {

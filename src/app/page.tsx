@@ -99,8 +99,8 @@ function Dashboard() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           query: `
             query GetEmployees($filter: EmployeeFilterInput, $page: Int, $pageSize: Int, $sortBy: EmployeeSortField, $sortOrder: SortOrder) {
