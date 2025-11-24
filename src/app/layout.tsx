@@ -10,8 +10,8 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Ultra Ship  System",
-  description: "Full-stack Ultra Ship  system with GraphQL and Next.js",
+  title: "Ultra Ship System",
+  description: "Full-stack Ultra Ship system with GraphQL and Next.js",
 };
 
 export default function RootLayout({
@@ -20,9 +20,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${nunito.variable} antialiased`}
+        suppressHydrationWarning
       >
         {children}
       </body>
