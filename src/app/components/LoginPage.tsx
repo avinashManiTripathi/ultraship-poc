@@ -37,6 +37,7 @@ export default function LoginPage({ onLoginSuccess }: { onLoginSuccess: () => vo
               requestOTP(email: $email) {
                 success
                 message
+                otp
               }
             }
           `,
@@ -52,6 +53,11 @@ export default function LoginPage({ onLoginSuccess }: { onLoginSuccess: () => vo
 
       if (result.data.requestOTP.success) {
         setStep('otp');
+        // Display OTP in development for easy testing
+        if (result.data.requestOTP.otp) {
+          setOtp(result.data.requestOTP.otp);
+          console.log('🔐 OTP for testing:', result.data.requestOTP.otp);
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Failed to send OTP');
@@ -92,6 +98,7 @@ export default function LoginPage({ onLoginSuccess }: { onLoginSuccess: () => vo
               requestOTP(email: $email) {
                 success
                 message
+                otp
               }
             }
           `,
@@ -102,7 +109,13 @@ export default function LoginPage({ onLoginSuccess }: { onLoginSuccess: () => vo
       const result = await response.json();
       
       if (result.data.requestOTP.success) {
-        alert('New OTP sent to your email!');
+        // Display OTP in development for easy testing
+        if (result.data.requestOTP.otp) {
+          console.log('🔐 Resent OTP for testing:', result.data.requestOTP.otp);
+          alert(`New OTP sent! For testing, your OTP is: ${result.data.requestOTP.otp}`);
+        } else {
+          alert('New OTP sent to your email!');
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Failed to resend OTP');

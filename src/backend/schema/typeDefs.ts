@@ -34,6 +34,7 @@ const typeDefs = gql`
   type OTPResponse {
     success: Boolean!
     message: String!
+    otp: String
   }
 
   type Department {

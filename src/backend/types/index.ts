@@ -133,5 +133,6 @@ export interface AuthPayload {
 export interface OTPResponse {
   success: boolean;
   message: string;
+  otp?: string;
 }
 

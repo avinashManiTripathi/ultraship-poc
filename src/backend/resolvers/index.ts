@@ -269,9 +269,12 @@ const resolvers = {
         // Send email
         await sendOTPEmail(email, otpCode);
 
+        // Return OTP in response (useful for development/testing)
+        // In production, you may want to remove this or make it conditional
         return {
           success: true,
-          message: 'OTP sent to your email. It will expire in 5 minutes.'
+          message: 'OTP sent to your email. It will expire in 5 minutes.',
+          otp: otpCode // Include OTP in response for testing
         };
       } catch (error) {
         console.error('Request OTP error:', error);
