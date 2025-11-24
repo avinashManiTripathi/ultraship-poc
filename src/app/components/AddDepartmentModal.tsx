@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useDepartmentMutations } from '@/hooks/useDepartments';
 import { Button, Input, Textarea, Modal, Alert } from './ui';
 
 interface AddDepartmentModalProps {
@@ -18,7 +19,7 @@ interface AddDepartmentModalProps {
  * @returns {React.ReactNode} The AddDepartmentModal component.
  */
 export default function AddDepartmentModal({ isOpen, onClose, onSuccess }: AddDepartmentModalProps) {
-  const [loading, setLoading] = useState(false);
+  const { addDepartment, loading, error: hookError } = useDepartmentMutations();
   const [error, setError] = useState('');
   
   const [formData, setFormData] = useState({
@@ -29,47 +30,18 @@ export default function AddDepartmentModal({ isOpen, onClose, onSuccess }: AddDe
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
     try {
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `
-            mutation AddDepartment($input: DepartmentInput!) {
-              addDepartment(input: $input) {
-                id
-                name
-                description
-              }
-            }
-          `,
-          variables: {
-            input: {
-              name: formData.name,
-              description: formData.description
-            }
-          },
-        }),
+      await addDepartment({
+        name: formData.name,
+        description: formData.description
       });
-
-      const result = await response.json();
-
-      if (result.errors) {
-        throw new Error(result.errors[0].message);
-      }
 
       onSuccess();
       onClose();
       setFormData({ name: '', description: '' });
     } catch (err: any) {
-      setError(err.message || 'Failed to add department');
-    } finally {
-      setLoading(false);
+      setError(err.message || hookError || 'Failed to add department');
     }
   };
 

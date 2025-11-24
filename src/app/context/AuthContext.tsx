@@ -1,6 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { graphqlQuery, graphqlMutation } from '@/lib/graphql-client';
+import { GET_ME } from '@/graphql/queries';
+import { VERIFY_OTP, LOGOUT } from '@/graphql/mutations';
 
 interface User {
   id: string;
@@ -31,30 +34,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkSession = async () => {
     try {
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `
-            query {
-              me {
-                id
-                username
-                email
-                role
-              }
-            }
-          `,
-        }),
-      });
-
-      const result = await response.json();
+      const data = await graphqlQuery<{ me: User }>(GET_ME);
       
-      if (result.data?.me) {
-        setUser(result.data.me);
+      if (data.me) {
+        setUser(data.me);
       }
     } catch (error) {
       // Session doesn't exist or expired
@@ -66,38 +49,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, otp: string) => {
     try {
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `
-            mutation VerifyOTP($email: String!, $otp: String!) {
-              verifyOTP(email: $email, otp: $otp) {
-                user {
-                  id
-                  username
-                  email
-                  role
-                }
-                message
-              }
-            }
-          `,
-          variables: { email, otp },
-        }),
-      });
+      const data = await graphqlMutation<{
+        verifyOTP: {
+          user: User;
+          message: string;
+        };
+      }>(VERIFY_OTP, { email, otp });
 
-      const result = await response.json();
-      
-      if (result.errors) {
-        throw new Error(result.errors[0].message);
-      }
-
-      const newUser = result.data.verifyOTP.user;
-      setUser(newUser);
+      setUser(data.verifyOTP.user);
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -106,20 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `
-            mutation {
-              logout
-            }
-          `,
-        }),
-      });
+      await graphqlMutation(LOGOUT);
     } catch (error) {
       console.error('Logout error:', error);
     } finally {

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { useEmployees, useEmployeeMutations } from '@/hooks/useEmployees';
+import { useDepartments } from '@/hooks/useDepartments';
 import LoginPage from './components/LoginPage';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -41,7 +43,6 @@ function Dashboard() {
   const [employeeToEdit, setEmployeeToEdit] = useState<Employee | null>(null);
   const [showManageDepartments, setShowManageDepartments] = useState(false);
   const [flaggedEmployees, setFlaggedEmployees] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -50,49 +51,34 @@ function Dashboard() {
   const [sortOrder, setSortOrder] = useState('ASC');
   const [departmentFilter, setDepartmentFilter] = useState<{ type: 'all' | 'department', value?: string }>({ type: 'all' });
   const [departments, setDepartments] = useState<string[]>([]);
+  
+  // Hooks
+  const { fetchEmployees: fetchEmps, loading } = useEmployees();
+  const { deleteEmployee } = useEmployeeMutations();
+  const { fetchDepartments: fetchDepts } = useDepartments();
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchEmployees();
-      fetchDepartments();
+      loadEmployees();
+      loadDepartments();
     }
   }, [isAuthenticated, currentPage, searchTerm, sortBy, sortOrder, departmentFilter]);
 
-  const fetchDepartments = async () => {
+  const loadDepartments = async () => {
     try {
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `
-            query {
-              departments {
-                name
-              }
-            }
-          `,
-        }),
-      });
-
-      const result = await response.json();
-      if (result.data?.departments) {
-        setDepartments(result.data.departments.map((d: any) => d.name));
-      }
+      const depts = await fetchDepts();
+      setDepartments(depts.map((d: any) => d.name));
     } catch (err) {
       console.error('Failed to fetch departments:', err);
     }
   };
 
-  const fetchEmployees = async () => {
-    setLoading(true);
+  const loadEmployees = async () => {
     setError('');
 
     try {
-      // Build filter based on search and department
-      let filter: any = {};
+      // Build filter object
+      const filter: any = {};
       if (searchTerm) {
         filter.name = searchTerm;
       }
@@ -100,94 +86,26 @@ function Dashboard() {
         filter.department = departmentFilter.value;
       }
 
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `
-            query GetEmployees($filter: EmployeeFilterInput, $page: Int, $pageSize: Int, $sortBy: EmployeeSortField, $sortOrder: SortOrder) {
-              employees(filter: $filter, page: $page, pageSize: $pageSize, sortBy: $sortBy, sortOrder: $sortOrder) {
-                employees {
-                  id
-                  name
-                  age
-                  class
-                  subjects
-                  attendance
-                  email
-                  phone
-                  department
-                  position
-                  joinDate
-                  salary
-                  address
-                  status
-                }
-                totalCount
-                pageInfo {
-                  currentPage
-                  pageSize
-                  totalPages
-                  hasNextPage
-                  hasPreviousPage
-                }
-              }
-            }
-          `,
-          variables: {
-            filter: Object.keys(filter).length > 0 ? filter : null,
-            page: currentPage,
-            pageSize: 12,
-            sortBy,
-            sortOrder,
-          },
-        }),
+      const result = await fetchEmps({
+        filter: Object.keys(filter).length > 0 ? filter : undefined,
+        page: currentPage,
+        pageSize: 12,
+        sortBy,
+        sortOrder,
       });
 
-      const result = await response.json();
-
-      if (result.errors) {
-        throw new Error(result.errors[0].message);
-      }
-
-      setEmployees(result.data.employees.employees);
-      setTotalPages(result.data.employees.pageInfo.totalPages);
+      setEmployees(result.employees);
+      setTotalPages(result.pageInfo.totalPages);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch employees');
       console.error('Fetch error:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleDelete = async (employeeId: string) => {
     try {
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `
-            mutation DeleteEmployee($id: ID!) {
-              deleteEmployee(id: $id)
-            }
-          `,
-          variables: { id: employeeId },
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.errors) {
-        throw new Error(result.errors[0].message);
-      }
-
-      fetchEmployees(); // Refresh the list
+      await deleteEmployee(employeeId);
+      loadEmployees(); // Refresh the list
     } catch (err: any) {
       alert(err.message || 'Failed to delete employee');
     }
@@ -423,7 +341,7 @@ function Dashboard() {
       <AddEmployeeModal 
         isOpen={showAddModal} 
         onClose={() => setShowAddModal(false)}
-        onSuccess={fetchEmployees}
+        onSuccess={loadEmployees}
         departments={departments}
       />
 
@@ -434,7 +352,7 @@ function Dashboard() {
           setShowEditModal(false);
           setEmployeeToEdit(null);
         }}
-        onSuccess={fetchEmployees}
+        onSuccess={loadEmployees}
         employee={employeeToEdit}
         departments={departments}
       />
@@ -444,7 +362,7 @@ function Dashboard() {
         isOpen={showManageDepartments}
         onClose={() => {
           setShowManageDepartments(false);
-          fetchDepartments(); // Refresh departments after managing
+          loadDepartments(); // Refresh departments after managing
         }}
       />
     </div>

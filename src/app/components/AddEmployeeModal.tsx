@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useEmployeeMutations } from '@/hooks/useEmployees';
 import { Button, Input, Select, Textarea, Modal, Alert } from './ui';
 
 interface AddEmployeeModalProps {
@@ -21,7 +22,7 @@ interface AddEmployeeModalProps {
  */
 
 export default function AddEmployeeModal({ isOpen, onClose, onSuccess, departments }: AddEmployeeModalProps) {
-  const [loading, setLoading] = useState(false);
+  const { addEmployee, loading, error: hookError } = useEmployeeMutations();
   const [error, setError] = useState('');
   
   const [formData, setFormData] = useState({
@@ -43,63 +44,34 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess, departmen
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
     try {
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `
-            mutation AddEmployee($input: EmployeeInput!) {
-              addEmployee(input: $input) {
-                id
-                name
-                email
-              }
-            }
-          `,
-          variables: {
-            input: {
-              name: formData.name,
-              age: parseInt(formData.age),
-              class: formData.class,
-              subjects: formData.subjects.split(',').map(s => s.trim()),
-              attendance: parseFloat(formData.attendance),
-              email: formData.email,
-              phone: formData.phone,
-              department: formData.department,
-              position: formData.position,
-              joinDate: formData.joinDate,
-              salary: parseFloat(formData.salary),
-              address: formData.address,
-              status: formData.status
-            }
-          },
-        }),
+      await addEmployee({
+        name: formData.name,
+        age: parseInt(formData.age),
+        class: formData.class,
+        subjects: formData.subjects.split(',').map(s => s.trim()),
+        attendance: parseFloat(formData.attendance),
+        email: formData.email,
+        phone: formData.phone,
+        department: formData.department,
+        position: formData.position,
+        joinDate: formData.joinDate,
+        salary: parseFloat(formData.salary),
+        address: formData.address,
+        status: formData.status
       });
-
-      const result = await response.json();
-
-      if (result.errors) {
-        throw new Error(result.errors[0].message);
-      }
 
       onSuccess();
       onClose();
       // Reset form
       setFormData({
         name: '', age: '', class: 'Mid-Level', subjects: '', attendance: '',
-        email: '', phone: '', department: 'Engineering', position: '', joinDate: '',
+        email: '', phone: '', department: '', position: '', joinDate: '',
         salary: '', address: '', status: 'Active'
       });
     } catch (err: any) {
-      setError(err.message || 'Failed to add employee');
-    } finally {
-      setLoading(false);
+      setError(err.message || hookError || 'Failed to add employee');
     }
   };
 

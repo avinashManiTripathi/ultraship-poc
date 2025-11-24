@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useDepartments, useDepartmentMutations } from '@/hooks/useDepartments';
 import { Button, Card, Modal } from './ui';
 import AddDepartmentModal from './AddDepartmentModal';
 
@@ -25,46 +26,22 @@ interface ManageDepartmentsProps {
  */
 export default function ManageDepartments({ isOpen, onClose }: ManageDepartmentsProps) {
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const { fetchDepartments: fetchDepts, loading } = useDepartments();
+  const { deleteDepartment } = useDepartmentMutations();
 
   useEffect(() => {
     if (isOpen) {
-      fetchDepartments();
+      loadDepartments();
     }
   }, [isOpen]);
 
-  const fetchDepartments = async () => {
-    setLoading(true);
+  const loadDepartments = async () => {
     try {
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `
-            query {
-              departments {
-                id
-                name
-                description
-                createdAt
-              }
-            }
-          `,
-        }),
-      });
-
-      const result = await response.json();
-      if (result.data?.departments) {
-        setDepartments(result.data.departments);
-      }
+      const depts = await fetchDepts();
+      setDepartments(depts as any);
     } catch (err) {
       console.error('Failed to fetch departments:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -74,31 +51,10 @@ export default function ManageDepartments({ isOpen, onClose }: ManageDepartments
     }
 
     try {
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `
-            mutation DeleteDepartment($id: ID!) {
-              deleteDepartment(id: $id)
-            }
-          `,
-          variables: { id },
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.errors) {
-        alert(result.errors[0].message);
-      } else {
-        fetchDepartments();
-      }
+      await deleteDepartment(id);
+      loadDepartments();
     } catch (err: any) {
-      alert('Failed to delete department');
+      alert(err.message || 'Failed to delete department');
     }
   };
 
@@ -169,7 +125,7 @@ export default function ManageDepartments({ isOpen, onClose }: ManageDepartments
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSuccess={() => {
-          fetchDepartments();
+          loadDepartments();
           setShowAddModal(false);
         }}
       />

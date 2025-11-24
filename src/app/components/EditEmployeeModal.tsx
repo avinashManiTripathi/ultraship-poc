@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useEmployeeMutations } from '@/hooks/useEmployees';
 import { Button, Input, Select, Textarea, Modal, Alert } from './ui';
 
 interface Employee {
@@ -40,7 +41,7 @@ interface EditEmployeeModalProps {
  */
 
 export default function EditEmployeeModal({ isOpen, onClose, onSuccess, employee, departments }: EditEmployeeModalProps) {
-  const [loading, setLoading] = useState(false);
+  const { updateEmployee, loading, error: hookError } = useEmployeeMutations();
   const [error, setError] = useState('');
   
   const [formData, setFormData] = useState({
@@ -90,58 +91,28 @@ export default function EditEmployeeModal({ isOpen, onClose, onSuccess, employee
     if (!employee) return;
     
     setError('');
-    setLoading(true);
 
     try {
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `
-            mutation UpdateEmployee($id: ID!, $input: UpdateEmployeeInput!) {
-              updateEmployee(id: $id, input: $input) {
-                id
-                name
-                email
-              }
-            }
-          `,
-          variables: {
-            id: employee.id,
-            input: {
-              name: formData.name,
-              age: parseInt(formData.age),
-              class: formData.class,
-              subjects: formData.subjects.split(',').map(s => s.trim()),
-              attendance: parseFloat(formData.attendance),
-              email: formData.email,
-              phone: formData.phone,
-              department: formData.department,
-              position: formData.position,
-              joinDate: formData.joinDate,
-              salary: parseFloat(formData.salary),
-              address: formData.address,
-              status: formData.status
-            }
-          },
-        }),
+      await updateEmployee(employee.id, {
+        name: formData.name,
+        age: parseInt(formData.age),
+        class: formData.class,
+        subjects: formData.subjects.split(',').map(s => s.trim()),
+        attendance: parseFloat(formData.attendance),
+        email: formData.email,
+        phone: formData.phone,
+        department: formData.department,
+        position: formData.position,
+        joinDate: formData.joinDate,
+        salary: parseFloat(formData.salary),
+        address: formData.address,
+        status: formData.status
       });
-
-      const result = await response.json();
-
-      if (result.errors) {
-        throw new Error(result.errors[0].message);
-      }
 
       onSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Failed to update employee');
-    } finally {
-      setLoading(false);
+      setError(err.message || hookError || 'Failed to update employee');
     }
   };
 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useAuth } from '../context/AuthContext';
+import { useAuthMutations } from '@/hooks/useAuth';
 import { Button, Input, Alert } from './ui';
 
 /**
@@ -16,111 +17,59 @@ export default function LoginPage({ onLoginSuccess }: { onLoginSuccess: () => vo
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState<'email' | 'otp'>('email');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const { requestOTP: requestOTPMutation, loading } = useAuthMutations();
 
   const handleRequestOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
     try {
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `
-            mutation RequestOTP($email: String!) {
-              requestOTP(email: $email) {
-                success
-                message
-                otp
-              }
-            }
-          `,
-          variables: { email },
-        }),
-      });
-
-      const result = await response.json();
+      const result = await requestOTPMutation(email);
       
-      if (result.errors) {
-        throw new Error(result.errors[0].message);
-      }
-
-      if (result.data.requestOTP.success) {
+      if (result.success) {
         setStep('otp');
         // Display OTP in development for easy testing
-        if (result.data.requestOTP.otp) {
-          setOtp(result.data.requestOTP.otp);
-          console.log('🔐 OTP for testing:', result.data.requestOTP.otp);
+        if (result.otp) {
+          setOtp(result.otp);
+          console.log('🔐 OTP for testing:', result.otp);
         }
       }
     } catch (err: any) {
       setError(err.message || 'Failed to send OTP');
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
 
     try {
       await login(email, otp);
       onLoginSuccess();
     } catch (err: any) {
       setError(err.message || 'Invalid OTP');
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleResendOTP = async () => {
     setError('');
-    setLoading(true);
 
     try {
-      const response = await fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          query: `
-            mutation RequestOTP($email: String!) {
-              requestOTP(email: $email) {
-                success
-                message
-                otp
-              }
-            }
-          `,
-          variables: { email },
-        }),
-      });
-
-      const result = await response.json();
+      const result = await requestOTPMutation(email);
       
-      if (result.data.requestOTP.success) {
+      if (result.success) {
         // Display OTP in development for easy testing
-        if (result.data.requestOTP.otp) {
-          console.log('🔐 Resent OTP for testing:', result.data.requestOTP.otp);
-          alert(`New OTP sent! For testing, your OTP is: ${result.data.requestOTP.otp}`);
+        if (result.otp) {
+          setOtp(result.otp);
+          console.log('🔐 Resent OTP for testing:', result.otp);
+          alert(`New OTP sent! For testing, your OTP is: ${result.otp}`);
         } else {
           alert('New OTP sent to your email!');
         }
       }
     } catch (err: any) {
       setError(err.message || 'Failed to resend OTP');
-    } finally {
-      setLoading(false);
     }
   };
 
