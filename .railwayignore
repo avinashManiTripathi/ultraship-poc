@@ -1,0 +1,8 @@
+# Don't include these in Railway deployment
+.env.local
+.env*.local
+*.log
+.DS_Store
+.vscode
+.idea
+
