@@ -2,10 +2,10 @@ const express = require('express');
 const next = require('next');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const session = require('express-session');
 const { ApolloServer } = require('@apollo/server');
 const typeDefs = require('./src/backend/schema/typeDefs');
 const resolvers = require('./src/backend/resolvers');
-const { getUserFromToken } = require('./src/backend/utils/auth');
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
@@ -21,9 +21,25 @@ async function startServer() {
   const server = express();
 
   // Middleware
-  server.use(cors());
+  server.use(cors({
+    origin: `http://${hostname}:${port}`,
+    credentials: true
+  }));
   server.use(express.json());
   server.use(express.urlencoded({ extended: true }));
+
+  // Session middleware
+  server.use(session({
+    secret: process.env.SESSION_SECRET || 'your-session-secret-change-in-production',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production', // true in production with HTTPS
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: 'lax'
+    }
+  }));
 
   // Initialize Apollo Server
   const apolloServer = new ApolloServer({
@@ -40,8 +56,8 @@ async function startServer() {
   // GraphQL endpoint handler
   server.post('/graphql', async (req, res) => {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '') || '';
-      const user = getUserFromToken(token);
+      // Get user from session instead of token
+      const user = req.session.user || null;
 
       const result = await apolloServer.executeOperation(
         {
@@ -50,7 +66,12 @@ async function startServer() {
           operationName: req.body.operationName,
         },
         {
-          contextValue: { user },
+          contextValue: { 
+            user,
+            session: req.session,
+            req,
+            res
+          },
         }
       );
 

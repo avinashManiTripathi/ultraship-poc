@@ -208,7 +208,14 @@ const users = [
     email: 'employee@company.com',
     password: '$2b$10$P.7u/KJ.HIM7PtFKddGReOgQT.3/dwySwcnqdxSfKU4iPuAxvu2lW', // password: employee123
     role: 'employee'
-  }
+  },
+  {
+    id: '1',
+    username: 'admin',
+    email: 'avinashmanitripathi97@gmail.com',
+    password: '$2b$10$B3pv6sB6RCFRv6kcxCSGPeWvGfd7LZgo9d3dBLOSguaArWEET.FXG', // password: admin123
+    role: 'admin'
+  },
 ];
 
 const departments = [
@@ -221,4 +228,7 @@ const departments = [
   { id: '7', name: 'Management', description: 'Executive management', createdAt: '2020-01-01' },
 ];
 
-module.exports = { employees, users, departments };
+// OTP storage (in production, use Redis)
+const otpStore = new Map(); // { email: { otp, expiresAt, attempts } }
+
+module.exports = { employees, users, departments, otpStore };

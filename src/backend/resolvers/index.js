@@ -1,6 +1,6 @@
 const { GraphQLError } = require('graphql');
-const { employees, users, departments } = require('../models/data');
-const { generateToken, hashPassword, comparePassword } = require('../utils/auth');
+const { employees, users, departments, otpStore } = require('../models/data');
+const { generateOTP, sendOTPEmail } = require('../utils/email');
 const { isAdmin, isAdminOrEmployee } = require('../middleware/auth');
 
 // In-memory counters for new IDs
@@ -128,69 +128,120 @@ const resolvers = {
   },
 
   Mutation: {
-    // Login
-    login: async (_, { email, password }) => {
+    // Request OTP
+    requestOTP: async (_, { email }) => {
       const user = users.find(u => u.email === email);
       
       if (!user) {
-        throw new GraphQLError('Invalid credentials', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
+        // Don't reveal if user exists or not
+        return {
+          success: true,
+          message: 'If an account exists with this email, an OTP has been sent.'
+        };
       }
 
-      const isValid = await comparePassword(password, user.password);
-      
-      if (!isValid) {
-        throw new GraphQLError('Invalid credentials', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
+      // Generate OTP
+      const otp = generateOTP();
+      const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
 
-      const token = generateToken(user);
+      // Store OTP
+      otpStore.set(email, {
+        otp,
+        expiresAt,
+        attempts: 0
+      });
+
+      // Send email
+      await sendOTPEmail(email, otp);
 
       return {
-        token,
+        success: true,
+        message: 'OTP sent to your email. It will expire in 5 minutes.'
+      };
+    },
+
+    // Verify OTP and login
+    verifyOTP: async (_, { email, otp }, context) => {
+      const otpData = otpStore.get(email);
+
+      if (!otpData) {
+        throw new GraphQLError('No OTP requested for this email', {
+          extensions: { code: 'BAD_USER_INPUT' },
+        });
+      }
+
+      // Check expiration
+      if (Date.now() > otpData.expiresAt) {
+        otpStore.delete(email);
+        throw new GraphQLError('OTP has expired. Please request a new one.', {
+          extensions: { code: 'OTP_EXPIRED' },
+        });
+      }
+
+      // Check attempts
+      if (otpData.attempts >= 3) {
+        otpStore.delete(email);
+        throw new GraphQLError('Too many failed attempts. Please request a new OTP.', {
+          extensions: { code: 'TOO_MANY_ATTEMPTS' },
+        });
+      }
+
+      // Verify OTP
+      if (otpData.otp !== otp) {
+        otpData.attempts++;
+        throw new GraphQLError(`Invalid OTP. ${3 - otpData.attempts} attempts remaining.`, {
+          extensions: { code: 'INVALID_OTP' },
+        });
+      }
+
+      // OTP is valid - get user
+      const user = users.find(u => u.email === email);
+      if (!user) {
+        throw new GraphQLError('User not found', {
+          extensions: { code: 'NOT_FOUND' },
+        });
+      }
+
+      // Clear OTP
+      otpStore.delete(email);
+
+      // Create session
+      context.session.user = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      };
+
+      // Save session
+      await new Promise((resolve, reject) => {
+        context.session.save((err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
+      return {
         user: {
           id: user.id,
           username: user.username,
           email: user.email,
           role: user.role,
         },
+        message: 'Login successful'
       };
     },
 
-    // Register
-    register: async (_, { username, email, password, role = 'employee' }) => {
-      // Check if user already exists
-      const existingUser = users.find(u => u.email === email);
-      if (existingUser) {
-        throw new GraphQLError('User already exists', {
-          extensions: { code: 'BAD_USER_INPUT' },
+    // Logout
+    logout: async (_, __, context) => {
+      await new Promise((resolve, reject) => {
+        context.session.destroy((err) => {
+          if (err) reject(err);
+          else resolve();
         });
-      }
+      });
 
-      const hashedPassword = await hashPassword(password);
-      const newUser = {
-        id: String(userIdCounter++),
-        username,
-        email,
-        password: hashedPassword,
-        role,
-      };
-
-      users.push(newUser);
-
-      const token = generateToken(newUser);
-
-      return {
-        token,
-        user: {
-          id: newUser.id,
-          username: newUser.username,
-          email: newUser.email,
-          role: newUser.role,
-        },
-      };
+      return true;
     },
 
     // Add employee (Admin only)
@@ -310,4 +361,3 @@ const resolvers = {
 };
 
 module.exports = resolvers;
-

@@ -29,7 +29,7 @@ interface Employee {
 }
 
 function Dashboard() {
-  const { isAuthenticated, token, isAdmin } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'tile'>('tile');
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -59,8 +59,8 @@ function Dashboard() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           query: `
             query {
@@ -164,8 +164,8 @@ function Dashboard() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           query: `
             mutation DeleteEmployee($id: ID!) {

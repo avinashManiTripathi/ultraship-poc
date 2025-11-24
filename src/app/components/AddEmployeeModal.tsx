@@ -11,7 +11,6 @@ interface AddEmployeeModalProps {
 }
 
 export default function AddEmployeeModal({ isOpen, onClose, onSuccess, departments }: AddEmployeeModalProps) {
-  const { token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -41,8 +40,8 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess, departmen
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           query: `
             mutation AddEmployee($input: EmployeeInput!) {

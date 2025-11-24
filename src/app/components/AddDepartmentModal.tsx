@@ -10,7 +10,6 @@ interface AddDepartmentModalProps {
 }
 
 export default function AddDepartmentModal({ isOpen, onClose, onSuccess }: AddDepartmentModalProps) {
-  const { token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
@@ -29,8 +28,8 @@ export default function AddDepartmentModal({ isOpen, onClose, onSuccess }: AddDe
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           query: `
             mutation AddDepartment($input: DepartmentInput!) {

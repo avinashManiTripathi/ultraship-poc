@@ -4,14 +4,8 @@ const createApolloClient = () => {
   return new ApolloClient({
     link: new HttpLink({
       uri: '/graphql',
+      credentials: 'include', // Send cookies with requests
       fetch: (uri, options) => {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-        if (token && options) {
-          options.headers = {
-            ...options.headers,
-            authorization: `Bearer ${token}`,
-          };
-        }
         return fetch(uri, options);
       },
     }),

@@ -27,8 +27,13 @@ const typeDefs = gql`
   }
 
   type AuthPayload {
-    token: String!
     user: User!
+    message: String
+  }
+
+  type OTPResponse {
+    success: Boolean!
+    message: String!
   }
 
   type Department {
@@ -136,9 +141,10 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    # Authentication
-    login(email: String!, password: String!): AuthPayload!
-    register(username: String!, email: String!, password: String!, role: String): AuthPayload!
+    # OTP-based Authentication
+    requestOTP(email: String!): OTPResponse!
+    verifyOTP(email: String!, otp: String!): AuthPayload!
+    logout: Boolean!
 
     # Employee mutations (require authentication)
     addEmployee(input: EmployeeInput!): Employee!

@@ -17,7 +17,6 @@ interface ManageDepartmentsProps {
 }
 
 export default function ManageDepartments({ isOpen, onClose }: ManageDepartmentsProps) {
-  const { token } = useAuth();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -72,8 +71,8 @@ export default function ManageDepartments({ isOpen, onClose }: ManageDepartments
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           query: `
             mutation DeleteDepartment($id: ID!) {
