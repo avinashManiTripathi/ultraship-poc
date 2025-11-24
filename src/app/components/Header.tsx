@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useAuth } from '../context/AuthContext';
 
 interface HeaderProps {
@@ -35,9 +36,16 @@ export default function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
               )}
             </svg>
           </button>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-            Employee Management
-          </h1>
+          <div className="flex items-center gap-3">
+            <Image 
+              src="/logo.svg" 
+              alt="Ultra Ship Logo" 
+              width={90} 
+              height={40} 
+              priority
+              className="dark:invert"
+            />
+          </div>
         </div>
 
         {/* Horizontal Menu */}

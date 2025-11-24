@@ -10,8 +10,8 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Employee Management System",
-  description: "Full-stack employee management system with GraphQL and Next.js",
+  title: "Ultra Ship  System",
+  description: "Full-stack Ultra Ship  system with GraphQL and Next.js",
 };
 
 export default function RootLayout({

@@ -35,12 +35,12 @@ export const sendOTPEmail = async (email: string, otp: string): Promise<boolean>
     }
 
     const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM || '"Employee Management" <noreply@company.com>',
+      from: process.env.EMAIL_FROM || '"Ultra Ship " <noreply@company.com>',
       to: email,
       subject: 'Your Login OTP',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563eb;">Employee Management System</h2>
+          <h2 style="color: #2563eb;">Ultra Ship  System</h2>
           <p>Your One-Time Password (OTP) for login is:</p>
           <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
             <h1 style="color: #1f2937; font-size: 36px; margin: 0; letter-spacing: 8px;">${otp}</h1>
