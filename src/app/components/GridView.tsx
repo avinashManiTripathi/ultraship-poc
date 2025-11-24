@@ -22,6 +22,13 @@ interface GridViewProps {
   onRowClick: (employee: Employee) => void;
 }
 
+/**
+ * @description This component is used to display a grid view.
+ * @param {GridViewProps} props - The props for the GridView component.
+ * @param {Employee[]} employees - The employees of the GridView component.
+ * @param {() => void} onRowClick - The function to call when a row is clicked.
+ * @returns {React.ReactNode} The GridView component.
+ */
 export default function GridView({ employees, onRowClick }: GridViewProps) {
   return (
     <div className="overflow-x-auto">

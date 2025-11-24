@@ -10,6 +10,13 @@ interface HeaderProps {
   isSidebarOpen: boolean;
 }
 
+/**
+ * @description This component is used to display a header.
+ * @param {HeaderProps} props - The props for the Header component.
+ * @param {() => void} onMenuToggle - The function to call when the menu is toggled.
+ * @param {boolean} isSidebarOpen - Whether the sidebar is open.
+ * @returns {React.ReactNode} The Header component.
+ */
 export default function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
   const { user, logout, isAdmin } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);

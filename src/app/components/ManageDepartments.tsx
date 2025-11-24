@@ -16,6 +16,13 @@ interface ManageDepartmentsProps {
   onClose: () => void;
 }
 
+/**
+ * @description This component is used to display a manage departments modal.
+ * @param {ManageDepartmentsProps} props - The props for the ManageDepartments component.
+ * @param {boolean} isOpen - Whether the ManageDepartments is open.
+ * @param {() => void} onClose - The function to call when the ManageDepartments is closed.
+ * @returns {React.ReactNode} The ManageDepartments component.
+ */
 export default function ManageDepartments({ isOpen, onClose }: ManageDepartmentsProps) {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);

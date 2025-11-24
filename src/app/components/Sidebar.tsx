@@ -12,6 +12,16 @@ interface SidebarProps {
   departments: string[];
 }
 
+/**
+ * @description This component is used to display a sidebar.
+ * @param {SidebarProps} props - The props for the Sidebar component.
+ * @param {boolean} isOpen - Whether the Sidebar is open.
+ * @param {() => void} onFilterChange - The function to call when the filter is changed.
+ * @param {currentFilter} currentFilter - The current filter of the Sidebar component.
+ * @param {() => void} onManageDepartments - The function to call when the manage departments is clicked.
+ * @param {string[]} departments - The departments of the Sidebar component.
+ * @returns {React.ReactNode} The Sidebar component.
+ */
 export default function Sidebar({ isOpen, onFilterChange, currentFilter, onManageDepartments, departments }: SidebarProps) {
   const { isAdmin } = useAuth();
   const [openSubmenu, setOpenSubmenu] = useState<string | null>('employees');

@@ -8,6 +8,17 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   children?: React.ReactNode;
 }
 
+/**
+ * @description This component is used to display a select.
+ * @param {SelectProps} props - The props for the Select component.
+ * @param {string} label - The label of the Select component.
+ * @param {string} error - The error of the Select component.
+ * @param {boolean} fullWidth - Whether the Select should be full width.
+ * @param {string} className - The className of the Select component.
+ * @param {React.SelectHTMLAttributes<HTMLSelectElement>} props - The props for the Select component.
+ * @returns {React.ReactNode} The Select component.
+ */
+
 export default function Select({
   label,
   error,

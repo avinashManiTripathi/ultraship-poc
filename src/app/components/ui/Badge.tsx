@@ -7,6 +7,14 @@ interface BadgeProps {
   className?: string;
 }
 
+/**
+ * @description This component is used to display a badge.
+ * @param {BadgeProps} children - The children of the Badge component.
+ * @param {string} variant - The variant of the Badge component.
+ * @param {string} size - The size of the Badge component.
+ * @param {string} className - The className of the Badge component.
+ * @returns {React.ReactNode} The Badge component.
+ */
 export default function Badge({
   children,
   variant = 'default',

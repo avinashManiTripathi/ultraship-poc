@@ -5,6 +5,12 @@ import Image from 'next/image';
 import { useAuth } from '../context/AuthContext';
 import { Button, Input, Alert } from './ui';
 
+/**
+ * @description This component is used to display a login page.
+ * @param {LoginPageProps} props - The props for the LoginPage component.
+ * @param {() => void} onLoginSuccess - The function to call when the login is successful.
+ * @returns {React.ReactNode} The LoginPage component.
+ */
 export default function LoginPage({ onLoginSuccess }: { onLoginSuccess: () => void }) {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');

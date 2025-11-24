@@ -6,6 +6,16 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   fullWidth?: boolean;
 }
 
+/**
+ * @description This component is used to display a textarea.
+ * @param {TextareaProps} props - The props for the Textarea component.
+ * @param {string} label - The label of the Textarea component.
+ * @param {string} error - The error of the Textarea component.
+ * @param {boolean} fullWidth - Whether the Textarea should be full width.
+ * @param {string} className - The className of the Textarea component.
+ * @param {React.TextareaHTMLAttributes<HTMLTextAreaElement>} props - The props for the Textarea component.
+ * @returns {React.ReactNode} The Textarea component.
+ */
 export default function Textarea({
   label,
   error,

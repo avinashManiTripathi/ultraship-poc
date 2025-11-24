@@ -10,6 +10,16 @@ interface AddEmployeeModalProps {
   departments: string[];
 }
 
+/**
+ * @description This component is used to display a add employee modal.
+ * @param {AddEmployeeModalProps} props - The props for the AddEmployeeModal component.
+ * @param {boolean} isOpen - Whether the AddEmployeeModal is open.
+ * @param {() => void} onClose - The function to call when the AddEmployeeModal is closed.
+ * @param {() => void} onSuccess - The function to call when the AddEmployeeModal is successful.
+ * @param {string[]} departments - The departments of the AddEmployeeModal.
+ * @returns {React.ReactNode} The AddEmployeeModal component.
+ */
+
 export default function AddEmployeeModal({ isOpen, onClose, onSuccess, departments }: AddEmployeeModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

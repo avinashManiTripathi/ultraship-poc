@@ -5,7 +5,16 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   fullWidth?: boolean;
 }
-
+/** 
+ * @description This component is used to display a input.
+ * @param {InputProps} props - The props for the Input component.
+ * @param {string} label - The label of the Input component.
+ * @param {string} error - The error of the Input component.
+ * @param {boolean} fullWidth - Whether the Input should be full width.
+ * @param {string} className - The className of the Input component.
+ * @param {React.InputHTMLAttributes<HTMLInputElement>} props - The props for the Input component.
+ * @returns {React.ReactNode} The Input component.
+ */
 export default function Input({
   label,
   error,

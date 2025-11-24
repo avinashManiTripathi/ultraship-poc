@@ -6,6 +6,14 @@ interface AlertProps {
   className?: string;
 }
 
+/**
+ * @description This component is used to display a alert message.
+ * @param {AlertProps} children - The children of the Alert component.
+ * @param {string} variant - The variant of the Alert component.
+ * @param {string} className - The className of the Alert component.
+ * @returns {React.ReactNode} The Alert component.
+ */
+
 export default function Alert({
   children,
   variant = 'info',

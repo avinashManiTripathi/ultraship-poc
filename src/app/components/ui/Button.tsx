@@ -8,6 +8,18 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
+/**
+ * @description This component is used to display a button.
+ * @param {ButtonProps} props - The props for the Button component.
+ * @param {string} variant - The variant of the Button component.
+ * @param {string} size - The size of the Button component.
+ * @param {boolean} fullWidth - Whether the Button should be full width.
+ * @param {boolean} loading - Whether the Button is loading.
+ * @param {boolean} disabled - Whether the Button is disabled.
+ * @param {string} className - The className of the Button component.
+ * @param {React.ButtonHTMLAttributes<HTMLButtonElement>} props - The props for the Button component.
+ * @returns {React.ReactNode} The Button component.
+ */
 export default function Button({
   variant = 'primary',
   size = 'md',

@@ -12,6 +12,19 @@ interface ModalProps {
   scrollable?: boolean;
 }
 
+/**
+ * @description This component is used to display a modal.
+ * @param {ModalProps} props - The props for the Modal component.
+ * @param {boolean} isOpen - Whether the Modal is open.
+ * @param {() => void} onClose - The function to call when the Modal is closed.
+ * @param {string} title - The title of the Modal.
+ * @param {string} subtitle - The subtitle of the Modal.
+ * @param {React.ReactNode} children - The children of the Modal.
+ * @param {string} maxWidth - The max width of the Modal.
+ * @param {React.ReactNode} footer - The footer of the Modal.
+ * @param {boolean} scrollable - Whether the Modal should be scrollable.
+ * @returns {React.ReactNode} The Modal component.
+ */ 
 export default function Modal({
   isOpen,
   onClose,

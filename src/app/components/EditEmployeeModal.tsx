@@ -28,6 +28,17 @@ interface EditEmployeeModalProps {
   departments: string[];
 }
 
+/**
+ * @description This component is used to display a edit employee modal.
+ * @param {EditEmployeeModalProps} props - The props for the EditEmployeeModal component.
+ * @param {boolean} isOpen - Whether the EditEmployeeModal is open.
+ * @param {() => void} onClose - The function to call when the EditEmployeeModal is closed.
+ * @param {() => void} onSuccess - The function to call when the EditEmployeeModal is successful.
+ * @param {Employee | null} employee - The employee of the EditEmployeeModal component.
+ * @param {string[]} departments - The departments of the EditEmployeeModal component.
+ * @returns {React.ReactNode} The EditEmployeeModal component.
+ */
+
 export default function EditEmployeeModal({ isOpen, onClose, onSuccess, employee, departments }: EditEmployeeModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

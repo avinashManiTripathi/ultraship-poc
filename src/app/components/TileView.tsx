@@ -30,6 +30,17 @@ interface TileViewProps {
   flaggedEmployees: Set<string>;
 }
 
+/**
+ * @description This component is used to display a tile view.
+ * @param {TileViewProps} props - The props for the TileView component.
+ * @param {Employee[]} employees - The employees of the TileView component.
+ * @param {() => void} onTileClick - The function to call when a tile is clicked.
+ * @param {() => void} onEdit - The function to call when a tile is edited.
+ * @param {() => void} onDelete - The function to call when a tile is deleted.
+ * @param {() => void} onFlag - The function to call when a tile is flagged.
+ * @param {Set<string>} flaggedEmployees - The flagged employees of the TileView component.
+ * @returns {React.ReactNode} The TileView component.
+ */
 export default function TileView({ employees, onTileClick, onEdit, onDelete, onFlag, flaggedEmployees }: TileViewProps) {
   const { isAdmin } = useAuth();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);

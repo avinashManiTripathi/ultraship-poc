@@ -9,6 +9,14 @@ interface AddDepartmentModalProps {
   onSuccess: () => void;
 }
 
+/**
+ * @description This component is used to display a add department modal.
+ * @param {AddDepartmentModalProps} props - The props for the AddDepartmentModal component.
+ * @param {boolean} isOpen - Whether the AddDepartmentModal is open.
+ * @param {() => void} onClose - The function to call when the AddDepartmentModal is closed.
+ * @param {() => void} onSuccess - The function to call when the AddDepartmentModal is successful.
+ * @returns {React.ReactNode} The AddDepartmentModal component.
+ */
 export default function AddDepartmentModal({ isOpen, onClose, onSuccess }: AddDepartmentModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
