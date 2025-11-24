@@ -9,6 +9,7 @@ import GridView from './components/GridView';
 import TileView from './components/TileView';
 import DetailView from './components/DetailView';
 import AddEmployeeModal from './components/AddEmployeeModal';
+import EditEmployeeModal from './components/EditEmployeeModal';
 import ManageDepartments from './components/ManageDepartments';
 
 interface Employee {
@@ -35,7 +36,10 @@ function Dashboard() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [employeeToEdit, setEmployeeToEdit] = useState<Employee | null>(null);
   const [showManageDepartments, setShowManageDepartments] = useState(false);
+  const [flaggedEmployees, setFlaggedEmployees] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -189,7 +193,53 @@ function Dashboard() {
   };
 
   const handleEdit = (employee: Employee) => {
-    alert('Edit feature - Coming soon!\n\nThis would open a modal to edit employee details.');
+    setEmployeeToEdit(employee);
+    setShowEditModal(true);
+  };
+
+  const handleFlag = (employeeId: string, employeeName: string) => {
+    setFlaggedEmployees(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(employeeId)) {
+        newSet.delete(employeeId);
+        showNotification(`Removed flag from ${employeeName}`, 'info');
+      } else {
+        newSet.add(employeeId);
+        showNotification(`Flagged ${employeeName} for review`, 'success');
+      }
+      return newSet;
+    });
+  };
+
+  const showNotification = (message: string, type: 'success' | 'info' | 'error') => {
+    // Create a temporary notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-20 right-4 z-[60] px-6 py-3 rounded-lg shadow-2xl border animate-in fade-in slide-in-from-right duration-300 ${
+      type === 'success' 
+        ? 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
+        : type === 'error'
+        ? 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300'
+        : 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300'
+    }`;
+    notification.innerHTML = `
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          ${type === 'success' 
+            ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />'
+            : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'
+          }
+        </svg>
+        <span class="font-medium">${message}</span>
+      </div>
+    `;
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateX(100%)';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
   };
 
   const handleFilterChange = (filter: { type: 'all' | 'department', value?: string }) => {
@@ -346,6 +396,8 @@ function Dashboard() {
                   onTileClick={setSelectedEmployee}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  onFlag={handleFlag}
+                  flaggedEmployees={flaggedEmployees}
                 />
               )}
 
@@ -386,6 +438,18 @@ function Dashboard() {
         isOpen={showAddModal} 
         onClose={() => setShowAddModal(false)}
         onSuccess={fetchEmployees}
+        departments={departments}
+      />
+
+      {/* Edit Employee Modal */}
+      <EditEmployeeModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEmployeeToEdit(null);
+        }}
+        onSuccess={fetchEmployees}
+        employee={employeeToEdit}
         departments={departments}
       />
 

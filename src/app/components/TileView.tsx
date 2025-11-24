@@ -25,9 +25,11 @@ interface TileViewProps {
   onTileClick: (employee: Employee) => void;
   onEdit: (employee: Employee) => void;
   onDelete: (employeeId: string) => void;
+  onFlag: (employeeId: string, employeeName: string) => void;
+  flaggedEmployees: Set<string>;
 }
 
-export default function TileView({ employees, onTileClick, onEdit, onDelete }: TileViewProps) {
+export default function TileView({ employees, onTileClick, onEdit, onDelete, onFlag, flaggedEmployees }: TileViewProps) {
   const { isAdmin } = useAuth();
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
@@ -42,10 +44,27 @@ export default function TileView({ employees, onTileClick, onEdit, onDelete }: T
         <div
           key={employee.id}
           onClick={() => onTileClick(employee)}
-          className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer border border-gray-200 dark:border-gray-700 overflow-hidden transform hover:scale-[1.02]"
+          className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer overflow-hidden transform hover:scale-[1.02] ${
+            flaggedEmployees.has(employee.id) 
+              ? 'border-2 border-yellow-500 dark:border-yellow-400 ring-2 ring-yellow-200 dark:ring-yellow-900/30' 
+              : 'border border-gray-200 dark:border-gray-700'
+          }`}
         >
           {/* Card Header with gradient */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 relative">
+          <div className={`p-4 relative ${
+            flaggedEmployees.has(employee.id)
+              ? 'bg-gradient-to-r from-yellow-500 to-amber-500'
+              : 'bg-gradient-to-r from-blue-600 to-indigo-600'
+          }`}>
+            {/* Flag indicator badge */}
+            {flaggedEmployees.has(employee.id) && (
+              <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1">
+                <svg className="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                </svg>
+                <span className="text-xs font-bold text-yellow-600">FLAGGED</span>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-2xl font-bold border-2 border-white/30">
                 {employee.name.split(' ').map(n => n[0]).join('')}
@@ -100,15 +119,19 @@ export default function TileView({ employees, onTileClick, onEdit, onDelete }: T
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        alert('Flag feature - Coming soon!');
+                        onFlag(employee.id, employee.name);
                         setActiveMenu(null);
                       }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                      className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${
+                        flaggedEmployees.has(employee.id)
+                          ? 'text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/30'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill={flaggedEmployees.has(employee.id) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                       </svg>
-                      Flag
+                      {flaggedEmployees.has(employee.id) ? 'Unflag' : 'Flag for Review'}
                     </button>
                   </div>
                 )}
