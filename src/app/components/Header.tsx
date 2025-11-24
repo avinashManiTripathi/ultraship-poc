@@ -45,15 +45,9 @@ export default function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
           <a href="#" className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium">
             Dashboard
           </a>
-          <a href="#" className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium">
-            Reports
-          </a>
-          <a href="#" className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium">
-            Analytics
-          </a>
           {isAdmin && (
             <a href="#" className="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors font-medium">
-              Admin Panel
+              Admin
             </a>
           )}
         </nav>
@@ -103,4 +97,3 @@ export default function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
     </header>
   );
 }
-

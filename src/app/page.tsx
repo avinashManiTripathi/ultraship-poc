@@ -8,6 +8,7 @@ import Sidebar from './components/Sidebar';
 import GridView from './components/GridView';
 import TileView from './components/TileView';
 import DetailView from './components/DetailView';
+import AddEmployeeModal from './components/AddEmployeeModal';
 
 interface Employee {
   id: string;
@@ -27,11 +28,12 @@ interface Employee {
 }
 
 function Dashboard() {
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated, token, isAdmin } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'tile'>('tile');
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -39,18 +41,28 @@ function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('ASC');
+  const [departmentFilter, setDepartmentFilter] = useState<{ type: 'all' | 'department', value?: string }>({ type: 'all' });
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchEmployees();
     }
-  }, [isAuthenticated, currentPage, searchTerm, sortBy, sortOrder]);
+  }, [isAuthenticated, currentPage, searchTerm, sortBy, sortOrder, departmentFilter]);
 
   const fetchEmployees = async () => {
     setLoading(true);
     setError('');
 
     try {
+      // Build filter based on search and department
+      let filter: any = {};
+      if (searchTerm) {
+        filter.name = searchTerm;
+      }
+      if (departmentFilter.type === 'department' && departmentFilter.value) {
+        filter.department = departmentFilter.value;
+      }
+
       const response = await fetch('/graphql', {
         method: 'POST',
         headers: {
@@ -89,7 +101,7 @@ function Dashboard() {
             }
           `,
           variables: {
-            filter: searchTerm ? { name: searchTerm } : null,
+            filter: Object.keys(filter).length > 0 ? filter : null,
             page: currentPage,
             pageSize: 12,
             sortBy,
@@ -148,6 +160,11 @@ function Dashboard() {
     alert('Edit feature - Coming soon!\n\nThis would open a modal to edit employee details.');
   };
 
+  const handleFilterChange = (filter: { type: 'all' | 'department', value?: string }) => {
+    setDepartmentFilter(filter);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
   if (!isAuthenticated) {
     return null;
   }
@@ -155,15 +172,32 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />
-      <Sidebar isOpen={isSidebarOpen} />
+      <Sidebar 
+        isOpen={isSidebarOpen} 
+        onFilterChange={handleFilterChange}
+        currentFilter={departmentFilter}
+      />
 
       <main className={`transition-all duration-300 pt-[57px] ${isSidebarOpen ? 'lg:ml-64' : ''}`}>
         <div className="p-6 space-y-6">
           {/* Controls Bar */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-              {/* Search */}
-              <div className="flex-1 w-full md:max-w-md">
+              {/* Left - Filter info & Search */}
+              <div className="flex-1 w-full md:max-w-md space-y-2">
+                {departmentFilter.type === 'department' && (
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
+                      {departmentFilter.value}
+                    </span>
+                    <button
+                      onClick={() => handleFilterChange({ type: 'all' })}
+                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    >
+                      Clear filter
+                    </button>
+                  </div>
+                )}
                 <div className="relative">
                   <input
                     type="text"
@@ -186,8 +220,20 @@ function Dashboard() {
                 </div>
               </div>
 
-              {/* Sort & View Toggle */}
-              <div className="flex gap-2 items-center">
+              {/* Right - Sort, View Toggle & Add Button */}
+              <div className="flex gap-2 items-center flex-wrap">
+                {isAdmin && (
+                  <button
+                    onClick={() => setShowAddModal(true)}
+                    className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Add Employee
+                  </button>
+                )}
+
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -297,6 +343,13 @@ function Dashboard() {
       {selectedEmployee && (
         <DetailView employee={selectedEmployee} onClose={() => setSelectedEmployee(null)} />
       )}
+
+      {/* Add Employee Modal */}
+      <AddEmployeeModal 
+        isOpen={showAddModal} 
+        onClose={() => setShowAddModal(false)}
+        onSuccess={fetchEmployees}
+      />
     </div>
   );
 }

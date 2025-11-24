@@ -5,15 +5,19 @@ import { useState } from 'react';
 
 interface SidebarProps {
   isOpen: boolean;
+  onFilterChange: (filter: { type: 'all' | 'department', value?: string }) => void;
+  currentFilter: { type: 'all' | 'department', value?: string };
 }
 
-export default function Sidebar({ isOpen }: SidebarProps) {
+export default function Sidebar({ isOpen, onFilterChange, currentFilter }: SidebarProps) {
   const { isAdmin } = useAuth();
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>('employees');
 
   const toggleSubmenu = (menu: string) => {
     setOpenSubmenu(openSubmenu === menu ? null : menu);
   };
+
+  const departments = ['Engineering', 'Design', 'Operations', 'Product', 'Data', 'Security', 'Management'];
 
   return (
     <>
@@ -53,63 +57,36 @@ export default function Sidebar({ isOpen }: SidebarProps) {
 
             {openSubmenu === 'employees' && (
               <div className="ml-4 mt-1 space-y-1">
-                <a href="#" className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <button
+                  onClick={() => onFilterChange({ type: 'all' })}
+                  className={`w-full text-left block px-4 py-2 text-sm rounded-lg transition-colors ${
+                    currentFilter.type === 'all'
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
                   All Employees
-                </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                  By Department
-                </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                  By Class
-                </a>
+                </button>
+                
+                <div className="pt-1">
+                  <p className="px-4 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">By Department</p>
+                  {departments.map((dept) => (
+                    <button
+                      key={dept}
+                      onClick={() => onFilterChange({ type: 'department', value: dept })}
+                      className={`w-full text-left block px-4 py-2 text-sm rounded-lg transition-colors ${
+                        currentFilter.type === 'department' && currentFilter.value === dept
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      {dept}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
-
-          {/* Reports Menu with Submenu */}
-          <div>
-            <button
-              onClick={() => toggleSubmenu('reports')}
-              className="w-full flex items-center justify-between px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium"
-            >
-              <div className="flex items-center gap-3">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>Reports</span>
-              </div>
-              <svg
-                className={`w-4 h-4 transition-transform ${openSubmenu === 'reports' ? 'rotate-180' : ''}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {openSubmenu === 'reports' && (
-              <div className="ml-4 mt-1 space-y-1">
-                <a href="#" className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                  Attendance
-                </a>
-                <a href="#" className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                  Performance
-                </a>
-              </div>
-            )}
-          </div>
-
-          {/* Analytics (no submenu) */}
-          <a
-            href="#"
-            className="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <span>Analytics</span>
-          </a>
 
           {isAdmin && (
             <>
@@ -126,7 +103,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <span>Admin Panel</span>
+                    <span>Admin</span>
                   </div>
                   <svg
                     className={`w-4 h-4 transition-transform ${openSubmenu === 'admin' ? 'rotate-180' : ''}`}
@@ -141,10 +118,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
                 {openSubmenu === 'admin' && (
                   <div className="ml-4 mt-1 space-y-1">
                     <a href="#" className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                      User Management
-                    </a>
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                      System Settings
+                      Settings
                     </a>
                   </div>
                 )}
@@ -156,4 +130,3 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     </>
   );
 }
-
