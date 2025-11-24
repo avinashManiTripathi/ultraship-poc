@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useAuth } from '../context/AuthContext';
+import { Button } from './ui';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -18,9 +19,10 @@ export default function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
       <div className="flex items-center justify-between px-4 py-3">
         {/* Left section - Hamburger & Logo */}
         <div className="flex items-center gap-4">
-          <button
+          <Button
             onClick={onMenuToggle}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            variant="ghost"
+            className="p-2"
             aria-label="Toggle menu"
           >
             <svg
@@ -35,7 +37,7 @@ export default function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               )}
             </svg>
-          </button>
+          </Button>
           <div className="flex items-center gap-3">
             <Image 
               src="/logo.svg" 
@@ -50,21 +52,22 @@ export default function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
 
         {/* Horizontal Menu */}
         <nav className="hidden md:flex items-center gap-1">
-          <a href="#" className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium">
+          <Button variant="ghost" className="px-4 py-2">
             Dashboard
-          </a>
+          </Button>
           {isAdmin && (
-            <a href="#" className="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors font-medium">
+            <Button variant="ghost" className="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30">
               Admin
-            </a>
+            </Button>
           )}
         </nav>
 
         {/* Right section - User Profile */}
         <div className="relative">
-          <button
+          <Button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            variant="ghost"
+            className="flex items-center gap-3 px-3 py-2"
           >
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
               {user?.username.charAt(0).toUpperCase()}
@@ -77,7 +80,7 @@ export default function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                 {user?.role}
               </p>
             </div>
-          </button>
+          </Button>
 
           {showProfileMenu && (
             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50">
@@ -89,15 +92,16 @@ export default function Header({ onMenuToggle, isSidebarOpen }: HeaderProps) {
                   {user?.email}
                 </p>
               </div>
-              <button
+              <Button
                 onClick={() => {
                   logout();
                   setShowProfileMenu(false);
                 }}
-                className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                variant="ghost"
+                className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
               >
                 Sign Out
-              </button>
+              </Button>
             </div>
           )}
         </div>

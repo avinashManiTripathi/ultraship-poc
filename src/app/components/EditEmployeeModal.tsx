@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { Button, Input, Select, Textarea, Modal, Alert } from './ui';
 
 interface Employee {
   id: string;
@@ -133,229 +134,182 @@ export default function EditEmployeeModal({ isOpen, onClose, onSuccess, employee
     }
   };
 
-  if (!isOpen || !employee) return null;
+  if (!employee) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-3xl w-full my-8">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 rounded-t-2xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-white">Edit Employee</h2>
-              <p className="text-white/80 text-sm mt-1">ID: {employee.id}</p>
-            </div>
-            <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Edit Employee"
+      subtitle={`ID: ${employee.id}`}
+      maxWidth="3xl"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && <Alert variant="error">{error}</Alert>}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Name *"
+            type="text"
+            name="name"
+            required
+            value={formData.name}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="Age *"
+            type="number"
+            name="age"
+            required
+            min="18"
+            max="100"
+            value={formData.age}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="Email *"
+            type="email"
+            name="email"
+            required
+            value={formData.email}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="Phone *"
+            type="tel"
+            name="phone"
+            required
+            value={formData.phone}
+            onChange={handleChange}
+          />
+
+          <Select
+            label="Department *"
+            name="department"
+            required
+            value={formData.department}
+            onChange={handleChange}
+          >
+            <option value="">Select Department</option>
+            {departments.map((dept) => (
+              <option key={dept} value={dept}>{dept}</option>
+            ))}
+          </Select>
+
+          <Input
+            label="Position *"
+            type="text"
+            name="position"
+            required
+            value={formData.position}
+            onChange={handleChange}
+          />
+
+          <Select
+            label="Class *"
+            name="class"
+            required
+            value={formData.class}
+            onChange={handleChange}
+          >
+            <option value="Junior">Junior</option>
+            <option value="Mid-Level">Mid-Level</option>
+            <option value="Senior">Senior</option>
+            <option value="Lead">Lead</option>
+            <option value="Manager">Manager</option>
+          </Select>
+
+          <Input
+            label="Join Date *"
+            type="date"
+            name="joinDate"
+            required
+            value={formData.joinDate}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="Salary *"
+            type="number"
+            name="salary"
+            required
+            min="0"
+            step="1000"
+            value={formData.salary}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="Attendance % *"
+            type="number"
+            name="attendance"
+            required
+            min="0"
+            max="100"
+            step="0.1"
+            value={formData.attendance}
+            onChange={handleChange}
+          />
+
+          <Select
+            label="Status *"
+            name="status"
+            required
+            value={formData.status}
+            onChange={handleChange}
+          >
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="On Leave">On Leave</option>
+          </Select>
+
+          <div className="md:col-span-2">
+            <Input
+              label="Skills/Subjects (comma-separated) *"
+              type="text"
+              name="subjects"
+              required
+              placeholder="e.g., React, Node.js, TypeScript"
+              value={formData.subjects}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <Textarea
+              label="Address *"
+              name="address"
+              required
+              rows={2}
+              value={formData.address}
+              onChange={handleChange}
+            />
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
-              {error}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name *</label>
-              <input
-                type="text"
-                name="name"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Age *</label>
-              <input
-                type="number"
-                name="age"
-                required
-                min="18"
-                max="100"
-                value={formData.age}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email *</label>
-              <input
-                type="email"
-                name="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone *</label>
-              <input
-                type="tel"
-                name="phone"
-                required
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Department *</label>
-              <select
-                name="department"
-                required
-                value={formData.department}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Select Department</option>
-                {departments.map((dept) => (
-                  <option key={dept} value={dept}>{dept}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Position *</label>
-              <input
-                type="text"
-                name="position"
-                required
-                value={formData.position}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Class *</label>
-              <select
-                name="class"
-                required
-                value={formData.class}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="Junior">Junior</option>
-                <option value="Mid-Level">Mid-Level</option>
-                <option value="Senior">Senior</option>
-                <option value="Lead">Lead</option>
-                <option value="Manager">Manager</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Join Date *</label>
-              <input
-                type="date"
-                name="joinDate"
-                required
-                value={formData.joinDate}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Salary *</label>
-              <input
-                type="number"
-                name="salary"
-                required
-                min="0"
-                step="1000"
-                value={formData.salary}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Attendance % *</label>
-              <input
-                type="number"
-                name="attendance"
-                required
-                min="0"
-                max="100"
-                step="0.1"
-                value={formData.attendance}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status *</label>
-              <select
-                name="status"
-                required
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-                <option value="On Leave">On Leave</option>
-              </select>
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Skills/Subjects (comma-separated) *</label>
-              <input
-                type="text"
-                name="subjects"
-                required
-                placeholder="e.g., React, Node.js, TypeScript"
-                value={formData.subjects}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Address *</label>
-              <textarea
-                name="address"
-                required
-                rows={2}
-                value={formData.address}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-colors"
-            >
-              {loading ? 'Updating...' : 'Update Employee'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onClose}
+            className="flex-1"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            loading={loading}
+            className="flex-1"
+          >
+            Update Employee
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 }
 

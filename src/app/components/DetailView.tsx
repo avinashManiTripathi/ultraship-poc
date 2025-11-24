@@ -1,5 +1,7 @@
 "use client";
 
+import { Button, Badge } from './ui';
+
 interface Employee {
   id: string;
   name: string;
@@ -28,14 +30,15 @@ export default function DetailView({ employee, onClose }: DetailViewProps) {
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-4xl w-full my-8 animate-in fade-in zoom-in duration-200">
         {/* Header with gradient */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 rounded-t-2xl relative">
-          <button
+          <Button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
+            variant="ghost"
+            className="absolute top-4 right-4 p-2 hover:bg-white/20"
           >
             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </button>
+          </Button>
 
           <div className="flex items-center gap-6">
             <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-3xl font-bold border-4 border-white/30">
@@ -53,21 +56,17 @@ export default function DetailView({ employee, onClose }: DetailViewProps) {
         <div className="p-6 space-y-6">
           {/* Status Badges */}
           <div className="flex flex-wrap gap-3">
-            <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-              employee.attendance >= 95
-                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                : employee.attendance >= 90
-                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
-            }`}>
+            <Badge
+              variant={employee.attendance >= 95 ? 'success' : employee.attendance >= 90 ? 'warning' : 'danger'}
+            >
               {employee.attendance}% Attendance
-            </span>
-            <span className="px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-semibold">
+            </Badge>
+            <Badge variant="purple">
               {employee.class}
-            </span>
-            <span className="px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm font-semibold">
+            </Badge>
+            <Badge variant="success">
               {employee.status}
-            </span>
+            </Badge>
           </div>
 
           {/* Information Grid */}
@@ -146,27 +145,30 @@ export default function DetailView({ employee, onClose }: DetailViewProps) {
             </h3>
             <div className="flex flex-wrap gap-2">
               {employee.subjects.map((subject, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium"
-                >
+                <Badge key={index} variant="info" size="sm">
                   {subject}
-                </span>
+                </Badge>
               ))}
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button
+            <Button
               onClick={onClose}
-              className="flex-1 px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              variant="secondary"
+              fullWidth
+              className="px-6 py-3"
             >
               Close
-            </button>
-            <button className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-colors">
+            </Button>
+            <Button
+              variant="primary"
+              fullWidth
+              className="px-6 py-3"
+            >
               View Full Profile
-            </button>
+            </Button>
           </div>
         </div>
       </div>

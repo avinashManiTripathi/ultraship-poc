@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Button, Badge } from './ui';
 
 interface Employee {
   id: string;
@@ -72,34 +73,36 @@ export default function TileView({ employees, onTileClick, onEdit, onDelete, onF
               
               {/* Action Button */}
               <div className="relative">
-                <button
+                <Button
                   onClick={(e) => toggleMenu(employee.id, e)}
-                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                  variant="ghost"
+                  className="p-2 hover:bg-white/20"
                 >
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                   </svg>
-                </button>
+                </Button>
 
                 {/* Dropdown Menu */}
                 {activeMenu === employee.id && (
                   <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 py-1 z-50">
                     {isAdmin && (
                       <>
-                        <button
+                        <Button
                           onClick={(e) => {
                             e.stopPropagation();
                             onEdit(employee);
                             setActiveMenu(null);
                           }}
+                          variant="ghost"
                           className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 flex items-center gap-2"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
                           Edit
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={(e) => {
                             e.stopPropagation();
                             if (confirm(`Delete ${employee.name}?`)) {
@@ -107,21 +110,23 @@ export default function TileView({ employees, onTileClick, onEdit, onDelete, onF
                             }
                             setActiveMenu(null);
                           }}
+                          variant="ghost"
                           className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center gap-2"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                           Delete
-                        </button>
+                        </Button>
                       </>
                     )}
-                    <button
+                    <Button
                       onClick={(e) => {
                         e.stopPropagation();
                         onFlag(employee.id, employee.name);
                         setActiveMenu(null);
                       }}
+                      variant="ghost"
                       className={`w-full text-left px-4 py-2 text-sm flex items-center gap-2 ${
                         flaggedEmployees.has(employee.id)
                           ? 'text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/30'
@@ -132,7 +137,7 @@ export default function TileView({ employees, onTileClick, onEdit, onDelete, onF
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                       </svg>
                       {flaggedEmployees.has(employee.id) ? 'Unflag' : 'Flag for Review'}
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -166,20 +171,15 @@ export default function TileView({ employees, onTileClick, onEdit, onDelete, onF
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                    employee.attendance >= 95
-                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                      : employee.attendance >= 90
-                      ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-                      : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
-                  }`}>
-                    {employee.attendance}% Attendance
-                  </span>
-                </div>
-                <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs font-semibold">
+                <Badge
+                  variant={employee.attendance >= 95 ? 'success' : employee.attendance >= 90 ? 'warning' : 'danger'}
+                  size="sm"
+                >
+                  {employee.attendance}% Attendance
+                </Badge>
+                <Badge variant="purple" size="sm">
                   {employee.class}
-                </span>
+                </Badge>
               </div>
             </div>
           </div>

@@ -11,6 +11,7 @@ import DetailView from './components/DetailView';
 import AddEmployeeModal from './components/AddEmployeeModal';
 import EditEmployeeModal from './components/EditEmployeeModal';
 import ManageDepartments from './components/ManageDepartments';
+import { Button, Input, Select, Badge, Card } from './components/ui';
 
 interface Employee {
   id: string;
@@ -265,25 +266,27 @@ function Dashboard() {
       <main className={`flex-1 flex flex-col transition-all duration-300 pt-[57px] overflow-hidden ${isSidebarOpen ? 'lg:ml-64' : ''}`}>
         <div className="p-6 pb-4">
           {/* Controls Bar - Fixed */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+          <Card className="p-4">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
               {/* Left - Filter info & Search */}
               <div className="flex-1 w-full md:max-w-md space-y-2">
                 {departmentFilter.type === 'department' && (
                   <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
+                    <Badge variant="info">
                       {departmentFilter.value}
-                    </span>
-                    <button
+                    </Badge>
+                    <Button
                       onClick={() => handleFilterChange({ type: 'all' })}
-                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                      variant="ghost"
+                      size="sm"
+                      className="text-sm"
                     >
                       Clear filter
-                    </button>
+                    </Button>
                   </div>
                 )}
                 <div className="relative">
-                  <input
+                  <Input
                     type="text"
                     placeholder="Search by name..."
                     value={searchTerm}
@@ -291,10 +294,10 @@ function Dashboard() {
                       setSearchTerm(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                    className="pl-10"
                   />
                   <svg
-                    className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
+                    className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -307,66 +310,61 @@ function Dashboard() {
               {/* Right - Sort, View Toggle & Add Button */}
               <div className="flex gap-2 items-center flex-wrap">
                 {isAdmin && (
-                  <button
+                  <Button
                     onClick={() => setShowAddModal(true)}
-                    className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:from-green-700 hover:to-emerald-700 transition-colors flex items-center gap-2"
+                    variant="success"
+                    className="flex items-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                     Add Employee
-                  </button>
+                  </Button>
                 )}
 
-                <select
+                <Select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="name">Name</option>
                   <option value="age">Age</option>
                   <option value="department">Department</option>
                   <option value="attendance">Attendance</option>
-                </select>
+                </Select>
 
-                <button
+                <Button
                   onClick={() => setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC')}
-                  className="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
+                  variant="secondary"
+                  className="p-2"
                 >
                   <svg className={`w-5 h-5 transition-transform ${sortOrder === 'DESC' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
                   </svg>
-                </button>
+                </Button>
 
                 <div className="flex border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
-                  <button
+                  <Button
                     onClick={() => setViewMode('grid')}
-                    className={`px-4 py-2 transition-colors ${
-                      viewMode === 'grid'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
-                    }`}
+                    variant={viewMode === 'grid' ? 'primary' : 'ghost'}
+                    className="rounded-none px-4 py-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => setViewMode('tile')}
-                    className={`px-4 py-2 transition-colors ${
-                      viewMode === 'tile'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
-                    }`}
+                    variant={viewMode === 'tile' ? 'primary' : 'ghost'}
+                    className="rounded-none px-4 py-2"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                     </svg>
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Scrollable Employee List Area */}
@@ -404,23 +402,23 @@ function Dashboard() {
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex justify-center gap-2 mt-6">
-                  <button
+                  <Button
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    variant="secondary"
                   >
                     Previous
-                  </button>
-                  <span className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                  </Button>
+                  <Badge variant="info" className="px-4 py-2 flex items-center">
                     {currentPage} / {totalPages}
-                  </span>
-                  <button
+                  </Badge>
+                  <Button
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    variant="secondary"
                   >
                     Next
-                  </button>
+                  </Button>
                 </div>
               )}
             </>

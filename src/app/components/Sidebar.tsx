@@ -2,6 +2,7 @@
 
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
+import { Button } from './ui';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -35,9 +36,10 @@ export default function Sidebar({ isOpen, onFilterChange, currentFilter, onManag
         <nav className="p-4 space-y-2">
           {/* Employees Menu with Submenu */}
           <div>
-            <button
+            <Button
               onClick={() => toggleSubmenu('employees')}
-              className="w-full flex items-center justify-between px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium"
+              variant="ghost"
+              className="w-full flex items-center justify-between px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               <div className="flex items-center gap-3">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,35 +55,37 @@ export default function Sidebar({ isOpen, onFilterChange, currentFilter, onManag
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
-            </button>
+            </Button>
 
             {openSubmenu === 'employees' && (
               <div className="ml-4 mt-1 space-y-1">
-                <button
+                <Button
                   onClick={() => onFilterChange({ type: 'all' })}
-                  className={`w-full text-left block px-4 py-2 text-sm rounded-lg transition-colors ${
+                  variant="ghost"
+                  className={`w-full text-left block px-4 py-2 text-sm rounded-lg ${
                     currentFilter.type === 'all'
                       ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >
                   All Employees
-                </button>
+                </Button>
                 
                 <div className="pt-1">
                   <p className="px-4 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">By Department</p>
                   {departments.map((dept) => (
-                    <button
+                    <Button
                       key={dept}
                       onClick={() => onFilterChange({ type: 'department', value: dept })}
-                      className={`w-full text-left block px-4 py-2 text-sm rounded-lg transition-colors ${
+                      variant="ghost"
+                      className={`w-full text-left block px-4 py-2 text-sm rounded-lg ${
                         currentFilter.type === 'department' && currentFilter.value === dept
                           ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium'
                           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                       }`}
                     >
                       {dept}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -94,9 +98,10 @@ export default function Sidebar({ isOpen, onFilterChange, currentFilter, onManag
               
               {/* Admin Menu with Submenu */}
               <div>
-                <button
+                <Button
                   onClick={() => toggleSubmenu('admin')}
-                  className="w-full flex items-center justify-between px-4 py-3 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors font-medium"
+                  variant="ghost"
+                  className="w-full flex items-center justify-between px-4 py-3 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg"
                 >
                   <div className="flex items-center gap-3">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,16 +118,17 @@ export default function Sidebar({ isOpen, onFilterChange, currentFilter, onManag
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                </button>
+                </Button>
 
                 {openSubmenu === 'admin' && (
                   <div className="ml-4 mt-1 space-y-1">
-                    <button
+                    <Button
                       onClick={onManageDepartments}
-                      className="w-full text-left block px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      variant="ghost"
+                      className="w-full text-left block px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                     >
                       Manage Departments
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
