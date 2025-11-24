@@ -1,142 +1,324 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import LoginPage from './components/LoginPage';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import GridView from './components/GridView';
+import TileView from './components/TileView';
+import DetailView from './components/DetailView';
 
-export default function Home() {
-  const [apiResponse, setApiResponse] = useState<string>("");
+interface Employee {
+  id: string;
+  name: string;
+  age: number;
+  class: string;
+  subjects: string[];
+  attendance: number;
+  email: string;
+  phone: string;
+  department: string;
+  position: string;
+  joinDate: string;
+  salary: number;
+  address: string;
+  status: string;
+}
+
+function Dashboard() {
+  const { isAuthenticated, token } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'tile'>('tile');
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(false);
-  const [name, setName] = useState("");
+  const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState('ASC');
 
-  const testGetAPI = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch("/api/hello");
-      const data = await response.json();
-      setApiResponse(JSON.stringify(data, null, 2));
-    } catch (error) {
-      setApiResponse(`Error: ${error}`);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchEmployees();
     }
-  };
+  }, [isAuthenticated, currentPage, searchTerm, sortBy, sortOrder]);
 
-  const testPostAPI = async () => {
+  const fetchEmployees = async () => {
     setLoading(true);
+    setError('');
+
     try {
-      const response = await fetch("/api/hello", {
-        method: "POST",
+      const response = await fetch('/graphql', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({
+          query: `
+            query GetEmployees($filter: EmployeeFilterInput, $page: Int, $pageSize: Int, $sortBy: EmployeeSortField, $sortOrder: SortOrder) {
+              employees(filter: $filter, page: $page, pageSize: $pageSize, sortBy: $sortBy, sortOrder: $sortOrder) {
+                employees {
+                  id
+                  name
+                  age
+                  class
+                  subjects
+                  attendance
+                  email
+                  phone
+                  department
+                  position
+                  joinDate
+                  salary
+                  address
+                  status
+                }
+                totalCount
+                pageInfo {
+                  currentPage
+                  pageSize
+                  totalPages
+                  hasNextPage
+                  hasPreviousPage
+                }
+              }
+            }
+          `,
+          variables: {
+            filter: searchTerm ? { name: searchTerm } : null,
+            page: currentPage,
+            pageSize: 12,
+            sortBy,
+            sortOrder,
+          },
+        }),
       });
-      const data = await response.json();
-      setApiResponse(JSON.stringify(data, null, 2));
-    } catch (error) {
-      setApiResponse(`Error: ${error}`);
+
+      const result = await response.json();
+
+      if (result.errors) {
+        throw new Error(result.errors[0].message);
+      }
+
+      setEmployees(result.data.employees.employees);
+      setTotalPages(result.data.employees.pageInfo.totalPages);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch employees');
+      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const testHealthAPI = async () => {
-    setLoading(true);
+  const handleDelete = async (employeeId: string) => {
     try {
-      const response = await fetch("/api/health");
-      const data = await response.json();
-      setApiResponse(JSON.stringify(data, null, 2));
-    } catch (error) {
-      setApiResponse(`Error: ${error}`);
-    } finally {
-      setLoading(false);
+      const response = await fetch('/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          query: `
+            mutation DeleteEmployee($id: ID!) {
+              deleteEmployee(id: $id)
+            }
+          `,
+          variables: { id: employeeId },
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.errors) {
+        throw new Error(result.errors[0].message);
+      }
+
+      fetchEmployees(); // Refresh the list
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete employee');
     }
   };
+
+  const handleEdit = (employee: Employee) => {
+    alert('Edit feature - Coming soon!\n\nThis would open a modal to edit employee details.');
+  };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black p-8">
-      <main className="flex min-h-screen w-full max-w-4xl flex-col gap-8 py-16 px-8 bg-white dark:bg-zinc-900 rounded-lg shadow-lg">
-        <div className="flex flex-col items-center gap-4">
-          <Image
-            className="dark:invert"
-            src="/next.svg"
-            alt="Next.js logo"
-            width={150}
-            height={30}
-            priority
-          />
-          <h1 className="text-4xl font-bold text-center text-black dark:text-white">
-            Ultraship POC
-          </h1>
-          <p className="text-center text-zinc-600 dark:text-zinc-400">
-            Next.js + Express Backend on Same Port
-          </p>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Header onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />
+      <Sidebar isOpen={isSidebarOpen} />
 
-        <div className="flex flex-col gap-4">
-          <h2 className="text-2xl font-semibold text-black dark:text-white">
-            Test API Endpoints
-          </h2>
-          
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={testGetAPI}
-              disabled={loading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors font-medium"
-            >
-              Test GET /api/hello
-            </button>
+      <main className={`transition-all duration-300 pt-[57px] ${isSidebarOpen ? 'lg:ml-64' : ''}`}>
+        <div className="p-6 space-y-6">
+          {/* Controls Bar */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+              {/* Search */}
+              <div className="flex-1 w-full md:max-w-md">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search by name..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  />
+                  <svg
+                    className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
 
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your name"
-                className="flex-1 px-4 py-3 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-black dark:text-white"
-              />
-              <button
-                onClick={testPostAPI}
-                disabled={loading}
-                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors font-medium"
-              >
-                Test POST /api/hello
-              </button>
+              {/* Sort & View Toggle */}
+              <div className="flex gap-2 items-center">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="name">Name</option>
+                  <option value="age">Age</option>
+                  <option value="department">Department</option>
+                  <option value="attendance">Attendance</option>
+                </select>
+
+                <button
+                  onClick={() => setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC')}
+                  className="p-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
+                >
+                  <svg className={`w-5 h-5 transition-transform ${sortOrder === 'DESC' ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                  </svg>
+                </button>
+
+                <div className="flex border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`px-4 py-2 transition-colors ${
+                      viewMode === 'grid'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('tile')}
+                    className={`px-4 py-2 transition-colors ${
+                      viewMode === 'tile'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
-
-            <button
-              onClick={testHealthAPI}
-              disabled={loading}
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 transition-colors font-medium"
-            >
-              Test GET /api/health
-            </button>
           </div>
 
-          {apiResponse && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold mb-2 text-black dark:text-white">
-                API Response:
-              </h3>
-              <pre className="bg-zinc-100 dark:bg-zinc-800 p-4 rounded-lg overflow-x-auto text-sm text-black dark:text-white border border-zinc-300 dark:border-zinc-700">
-                {apiResponse}
-              </pre>
+          {/* Loading & Error States */}
+          {loading && (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <p className="mt-4 text-gray-600 dark:text-gray-400">Loading employees...</p>
             </div>
           )}
-        </div>
 
-        <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">
-            ℹ️ Setup Info
-          </h3>
-          <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1">
-            <li>✅ Frontend (Next.js) and Backend (Express) run on same port</li>
-            <li>✅ Express handles /api/* routes before Next.js</li>
-            <li>✅ Custom server in server.js</li>
-            <li>✅ Run with: npm run dev</li>
-          </ul>
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          {/* Employee Data Views */}
+          {!loading && !error && (
+            <>
+              {viewMode === 'grid' ? (
+                <GridView employees={employees} onRowClick={setSelectedEmployee} />
+              ) : (
+                <TileView
+                  employees={employees}
+                  onTileClick={setSelectedEmployee}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              )}
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex justify-center gap-2 mt-6">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                  >
+                    Previous
+                  </button>
+                  <span className="px-4 py-2 bg-blue-600 text-white rounded-lg">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </main>
+
+      {/* Detail View Modal */}
+      {selectedEmployee && (
+        <DetailView employee={selectedEmployee} onClose={() => setSelectedEmployee(null)} />
+      )}
     </div>
   );
+}
+
+export default function Home() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  return (
+    <AuthProvider>
+      <AuthWrapper onLoginSuccess={() => setIsLoggedIn(true)}>
+        <Dashboard />
+      </AuthWrapper>
+    </AuthProvider>
+  );
+}
+
+function AuthWrapper({ children, onLoginSuccess }: { children: React.ReactNode; onLoginSuccess: () => void }) {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <LoginPage onLoginSuccess={onLoginSuccess} />;
+  }
+
+  return <>{children}</>;
 }

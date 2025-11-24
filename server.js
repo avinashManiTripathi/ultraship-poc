@@ -1,6 +1,11 @@
 const express = require('express');
 const next = require('next');
 const cors = require('cors');
+const { ApolloServer } = require('@apollo/server');
+const { expressMiddleware } = require('@apollo/server/express4');
+const typeDefs = require('./src/backend/schema/typeDefs');
+const resolvers = require('./src/backend/resolvers');
+const { getUserFromToken } = require('./src/backend/utils/auth');
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
@@ -10,7 +15,9 @@ const port = parseInt(process.env.PORT || '3000', 10);
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-app.prepare().then(() => {
+async function startServer() {
+  await app.prepare();
+
   const server = express();
 
   // Middleware
@@ -18,24 +25,49 @@ app.prepare().then(() => {
   server.use(express.json());
   server.use(express.urlencoded({ extended: true }));
 
-  // Express API Routes
-  // Simple hello endpoint
+  // Initialize Apollo Server
+  const apolloServer = new ApolloServer({
+    typeDefs,
+    resolvers,
+    formatError: (error) => {
+      console.error('GraphQL Error:', error);
+      return error;
+    },
+  });
+
+  await apolloServer.start();
+
+  // Apply Apollo middleware to /graphql endpoint
+  server.use(
+    '/graphql',
+    expressMiddleware(apolloServer, {
+      context: async ({ req }) => {
+        // Get token from headers
+        const token = req.headers.authorization?.replace('Bearer ', '') || '';
+        
+        // Get user from token
+        const user = getUserFromToken(token);
+        
+        return { user };
+      },
+    })
+  );
+
+  // Express REST API Routes (for legacy support if needed)
   server.get('/api/hello', (req, res) => {
     res.json({ message: 'Hello from Express backend!' });
   });
 
-  // Example POST endpoint
   server.post('/api/hello', (req, res) => {
     const { name } = req.body;
-    res.json({ 
+    res.json({
       message: `Hello ${name || 'Guest'} from Express backend!`,
       timestamp: new Date().toISOString()
     });
   });
 
-  // Health check endpoint
   server.get('/api/health', (req, res) => {
-    res.json({ 
+    res.json({
       status: 'ok',
       uptime: process.uptime(),
       timestamp: new Date().toISOString()
@@ -50,8 +82,12 @@ app.prepare().then(() => {
   server.listen(port, (err) => {
     if (err) throw err;
     console.log(`> Ready on http://${hostname}:${port}`);
-    console.log(`> Express backend running on same port`);
+    console.log(`> GraphQL endpoint: http://${hostname}:${port}/graphql`);
     console.log(`> Environment: ${dev ? 'development' : 'production'}`);
   });
-});
+}
 
+startServer().catch((error) => {
+  console.error('Error starting server:', error);
+  process.exit(1);
+});
