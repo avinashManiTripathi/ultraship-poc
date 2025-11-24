@@ -14,6 +14,10 @@ export const metadata: Metadata = {
   description: "Full-stack Ultra Ship system with GraphQL and Next.js",
 };
 
+// Force dynamic rendering for the entire app
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+
 export default function RootLayout({
   children,
 }: Readonly<{
