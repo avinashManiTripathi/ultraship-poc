@@ -3,8 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
+  // Output standalone for Railway deployment
+  output: 'standalone',
   experimental: {
-    // Disable static optimization for dynamic pages
     serverActions: {
       bodySizeLimit: '2mb',
     },
