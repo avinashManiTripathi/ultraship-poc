@@ -45,13 +45,19 @@ async function startServer(): Promise<void> {
   server.use(express.json());
   server.use(express.urlencoded({ extended: true }));
 
+  // Request logging middleware
+  server.use((req: Request, _res: Response, next: any) => {
+    console.log(`${req.method} ${req.path}`);
+    next();
+  });
+
   // Session middleware
   server.use(session({
     secret: process.env.SESSION_SECRET || 'your-session-secret-change-in-production',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production', // true in production with HTTPS
+      secure: process.env.NODE_ENV === 'production' && process.env.HTTPS === 'true', // Only secure with HTTPS
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       sameSite: 'lax'
@@ -73,9 +79,11 @@ async function startServer(): Promise<void> {
   });
 
   await apolloServer.start();
+  console.log('✅ Apollo Server started');
 
   // GraphQL endpoint handler
   server.post('/graphql', async (req: Request, res: Response) => {
+    console.log('📨 GraphQL POST request received');
     try {
       // Get user from session instead of token
       const user = req.session.user || null;
@@ -109,6 +117,7 @@ async function startServer(): Promise<void> {
 
   // GraphQL GET endpoint for playground
   server.get('/graphql', (_req: Request, res: Response) => {
+    console.log('📖 GraphQL GET request received (playground)');
     res.send(`
       <!DOCTYPE html>
       <html>
@@ -214,8 +223,10 @@ mutation {
     console.log('\n🚀 Server started successfully!');
     console.log(`> App URL: http://${hostname}:${port}`);
     console.log(`> GraphQL: http://${hostname}:${port}/graphql`);
+    console.log(`> Health Check: http://${hostname}:${port}/api/health`);
     console.log(`> Environment: ${dev ? 'development' : 'production'}`);
-    console.log(`> MongoDB: Connected\n`);
+    console.log(`> MongoDB: Connected`);
+    console.log(`> Session: Cookies ${process.env.NODE_ENV === 'production' && process.env.HTTPS === 'true' ? 'SECURE' : 'NOT SECURE'}\n`);
   });
 }
 
