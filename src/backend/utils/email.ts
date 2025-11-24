@@ -1,7 +1,7 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
+const SMTP_PORT = parseInt(process.env.EMAIL_PORT || '587', 10);
 
-const SMTP_PORT=587
 // Create reusable transporter
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -18,23 +18,24 @@ const transporter = nodemailer.createTransport({
 });
 
 // Generate 6-digit OTP
-const generateOTP = () => {
+export const generateOTP = (): string => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
 // Send OTP email
-const sendOTPEmail = async (email, otp) => {
-
-
-console.log(process.env.EMAIL_HOST, process.env.EMAIL_PORT, process.env.EMAIL_USER, process.env.EMAIL_PASS);
-
-
+export const sendOTPEmail = async (email: string, otp: string): Promise<boolean> => {
   try {
     // For development, log OTP to console
     console.log(`\n🔐 OTP for ${email}: ${otp}\n`);
     
+    // Only attempt to send email if credentials are configured
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.log('⚠️  Email credentials not configured. OTP logged to console only.');
+      return true;
+    }
+
     const info = await transporter.sendMail({
-      from: '"Employee Management" <noreply@company.com>',
+      from: process.env.EMAIL_FROM || '"Employee Management" <noreply@company.com>',
       to: email,
       subject: 'Your Login OTP',
       html: `
@@ -50,17 +51,12 @@ console.log(process.env.EMAIL_HOST, process.env.EMAIL_PORT, process.env.EMAIL_US
       `
     });
 
-    console.log('Email sent:', info.messageId);
+    console.log('✅ Email sent:', info.messageId);
     return true;
   } catch (error) {
-    console.error('Email error:', error);
+    console.error('❌ Email error:', error);
     // In development, still return true so OTP works even if email fails
     return true;
   }
-};
-
-module.exports = {
-  generateOTP,
-  sendOTPEmail
 };
 

@@ -1,4 +1,4 @@
-const { gql } = require('graphql-tag');
+import { gql } from 'graphql-tag';
 
 const typeDefs = gql`
   type Employee {
@@ -158,4 +158,5 @@ const typeDefs = gql`
   }
 `;
 
-module.exports = typeDefs;
+export default typeDefs;
+

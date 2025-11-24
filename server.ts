@@ -1,11 +1,21 @@
-const express = require('express');
-const next = require('next');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const session = require('express-session');
-const { ApolloServer } = require('@apollo/server');
-const typeDefs = require('./src/backend/schema/typeDefs');
-const resolvers = require('./src/backend/resolvers');
+import 'dotenv/config';
+import express, { Request, Response } from 'express';
+import next from 'next';
+import cors from 'cors';
+import session from 'express-session';
+import { ApolloServer } from '@apollo/server';
+import connectDB from './src/backend/config/database';
+import { seedDatabase } from './src/backend/utils/seed';
+import typeDefs from './src/backend/schema/typeDefs';
+import resolvers from './src/backend/resolvers';
+import { ISession, SessionUser } from './src/backend/types';
+
+// Extend Express Request type to include session
+declare module 'express-session' {
+  interface SessionData {
+    user?: SessionUser;
+  }
+}
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
@@ -15,7 +25,14 @@ const port = parseInt(process.env.PORT || '3000', 10);
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-async function startServer() {
+async function startServer(): Promise<void> {
+  // Connect to MongoDB
+  await connectDB();
+  
+  // Seed database with initial data
+  await seedDatabase();
+  
+  // Prepare Next.js
   await app.prepare();
 
   const server = express();
@@ -54,7 +71,7 @@ async function startServer() {
   await apolloServer.start();
 
   // GraphQL endpoint handler
-  server.post('/graphql', async (req, res) => {
+  server.post('/graphql', async (req: Request, res: Response) => {
     try {
       // Get user from session instead of token
       const user = req.session.user || null;
@@ -68,7 +85,7 @@ async function startServer() {
         {
           contextValue: { 
             user,
-            session: req.session,
+            session: req.session as ISession,
             req,
             res
           },
@@ -87,7 +104,7 @@ async function startServer() {
   });
 
   // GraphQL GET endpoint for playground
-  server.get('/graphql', (req, res) => {
+  server.get('/graphql', (_req: Request, res: Response) => {
     res.send(`
       <!DOCTYPE html>
       <html>
@@ -107,7 +124,7 @@ async function startServer() {
             <h1>🚀 GraphQL API</h1>
             <div class="info">
               <p><strong>Endpoint:</strong> <code>POST /graphql</code></p>
-              <p><strong>Authentication:</strong> Add header <code>Authorization: Bearer &lt;token&gt;</code></p>
+              <p><strong>Authentication:</strong> Session-based (OTP login)</p>
             </div>
             
             <h2>Sample Query</h2>
@@ -131,17 +148,26 @@ query {
   }
 }</pre>
 
-            <h2>Login Mutation</h2>
+            <h2>OTP Login Flow</h2>
             <pre>
+# Step 1: Request OTP
 mutation {
-  login(email: "admin@company.com", password: "admin123") {
-    token
+  requestOTP(email: "admin@company.com") {
+    success
+    message
+  }
+}
+
+# Step 2: Verify OTP (check console for OTP in development)
+mutation {
+  verifyOTP(email: "admin@company.com", otp: "123456") {
     user {
       id
       username
       email
       role
     }
+    message
   }
 }</pre>
 
@@ -154,11 +180,11 @@ mutation {
   });
 
   // Express REST API Routes (for legacy support if needed)
-  server.get('/api/hello', (req, res) => {
+  server.get('/api/hello', (_req: Request, res: Response) => {
     res.json({ message: 'Hello from Express backend!' });
   });
 
-  server.post('/api/hello', (req, res) => {
+  server.post('/api/hello', (req: Request, res: Response) => {
     const { name } = req.body;
     res.json({
       message: `Hello ${name || 'Guest'} from Express backend!`,
@@ -166,7 +192,7 @@ mutation {
     });
   });
 
-  server.get('/api/health', (req, res) => {
+  server.get('/api/health', (_req: Request, res: Response) => {
     res.json({
       status: 'ok',
       uptime: process.uptime(),
@@ -175,19 +201,22 @@ mutation {
   });
 
   // Let Next.js handle all other routes (must be last)
-  server.use((req, res) => {
+  server.use((req: Request, res: Response) => {
     return handle(req, res);
   });
 
-  server.listen(port, (err) => {
+  server.listen(port, (err?: Error) => {
     if (err) throw err;
-    console.log(`> Ready on http://${hostname}:${port}`);
-    console.log(`> GraphQL endpoint: http://${hostname}:${port}/graphql`);
+    console.log('\n🚀 Server started successfully!');
+    console.log(`> App URL: http://${hostname}:${port}`);
+    console.log(`> GraphQL: http://${hostname}:${port}/graphql`);
     console.log(`> Environment: ${dev ? 'development' : 'production'}`);
+    console.log(`> MongoDB: Connected\n`);
   });
 }
 
-startServer().catch((error) => {
+startServer().catch((error: Error) => {
   console.error('Error starting server:', error);
   process.exit(1);
 });
+
