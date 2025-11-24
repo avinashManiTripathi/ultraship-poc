@@ -202,7 +202,7 @@ function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="h-screen bg-gray-50 dark:bg-gray-900 flex flex-col overflow-hidden">
       <Header onMenuToggle={() => setIsSidebarOpen(!isSidebarOpen)} isSidebarOpen={isSidebarOpen} />
       <Sidebar 
         isOpen={isSidebarOpen} 
@@ -212,9 +212,9 @@ function Dashboard() {
         departments={departments}
       />
 
-      <main className={`transition-all duration-300 pt-[57px] ${isSidebarOpen ? 'lg:ml-64' : ''}`}>
-        <div className="p-6 space-y-6">
-          {/* Controls Bar */}
+      <main className={`flex-1 flex flex-col transition-all duration-300 pt-[57px] overflow-hidden ${isSidebarOpen ? 'lg:ml-64' : ''}`}>
+        <div className="p-6 pb-4">
+          {/* Controls Bar - Fixed */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 border border-gray-200 dark:border-gray-700">
             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
               {/* Left - Filter info & Search */}
@@ -317,7 +317,10 @@ function Dashboard() {
               </div>
             </div>
           </div>
+        </div>
 
+        {/* Scrollable Employee List Area */}
+        <div className="flex-1 overflow-y-auto px-6 pb-6">
           {/* Loading & Error States */}
           {loading && (
             <div className="text-center py-12">
