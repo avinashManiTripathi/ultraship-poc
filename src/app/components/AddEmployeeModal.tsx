@@ -99,8 +99,29 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess, departmen
       onClose={onClose}
       title="Add New Employee"
       maxWidth="3xl"
+      footer={
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onClose}
+            className="font-semibold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 text-sm"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            form="add-employee-form"
+            variant="primary"
+            loading={loading}
+            className="font-semibold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 px-3 py-1.5 text-sm"
+          >
+            Add Employee
+          </Button>
+        </div>
+      }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form id="add-employee-form" onSubmit={handleSubmit} className="space-y-4">
         {error && <Alert variant="error">{error}</Alert>}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -220,25 +241,6 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess, departmen
               onChange={(e) => setFormData({...formData, address: e.target.value})}
             />
           </div>
-        </div>
-
-        <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={onClose}
-            className="flex-1"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            loading={loading}
-            className="flex-1"
-          >
-            Add Employee
-          </Button>
         </div>
       </form>
     </Modal>

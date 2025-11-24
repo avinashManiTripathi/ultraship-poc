@@ -34,9 +34,11 @@ export default function Button({
     lg: 'px-8 py-4 text-lg'
   };
 
+  const customClassName = className || `${baseStyles} ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''} ${className}`;
+
   return (
     <button
-      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
+      className={customClassName}
       disabled={disabled || loading}
       {...props}
     >

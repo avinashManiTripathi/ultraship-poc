@@ -295,7 +295,7 @@ export default function EditEmployeeModal({ isOpen, onClose, onSuccess, employee
             type="button"
             variant="secondary"
             onClick={onClose}
-            className="flex-1"
+            className="font-semibold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 text-sm"
           >
             Cancel
           </Button>
@@ -303,7 +303,7 @@ export default function EditEmployeeModal({ isOpen, onClose, onSuccess, employee
             type="submit"
             variant="primary"
             loading={loading}
-            className="flex-1"
+            className="font-semibold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 px-3 py-1.5 text-sm"
           >
             Update Employee
           </Button>

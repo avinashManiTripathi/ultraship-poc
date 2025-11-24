@@ -97,7 +97,7 @@ export default function AddDepartmentModal({ isOpen, onClose, onSuccess }: AddDe
             type="button"
             variant="secondary"
             onClick={onClose}
-            className="flex-1"
+            className="font-semibold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 text-sm"
           >
             Cancel
           </Button>
@@ -105,7 +105,7 @@ export default function AddDepartmentModal({ isOpen, onClose, onSuccess }: AddDe
             type="submit"
             variant="success"
             loading={loading}
-            className="flex-1"
+            className="font-semibold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 px-3 py-1.5 text-sm"
           >
             Add Department
           </Button>

@@ -308,29 +308,18 @@ function Dashboard() {
               </div>
 
               {/* Right - Sort, View Toggle & Add Button */}
-              <div className="flex gap-2 items-center flex-wrap">
+              <div className="flex gap-2 items-center flex-nowrap">
                 {isAdmin && (
                   <Button
                     onClick={() => setShowAddModal(true)}
                     variant="success"
-                    className="flex items-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    Add Employee
+                    className='font-semibold rounded-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 px-3 py-1.5 text-sm  '
+                    >
+                    <div className="flex items-center gap-2">
+                      <span>Add Employee</span>
+                    </div>
                   </Button>
                 )}
-
-                <Select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="name">Name</option>
-                  <option value="age">Age</option>
-                  <option value="department">Department</option>
-                  <option value="attendance">Attendance</option>
-                </Select>
 
                 <Button
                   onClick={() => setSortOrder(sortOrder === 'ASC' ? 'DESC' : 'ASC')}
@@ -344,22 +333,21 @@ function Dashboard() {
 
                 <div className="flex border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
                   <Button
-                    onClick={() => setViewMode('grid')}
+                    onClick={() => setViewMode(viewMode === 'grid' ? 'tile' : 'grid')}
                     variant={viewMode === 'grid' ? 'primary' : 'ghost'}
-                    className="rounded-none px-4 py-2"
+                    className="rounded-none px-4 py-2 flex items-center gap-2"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  </Button>
-                  <Button
-                    onClick={() => setViewMode('tile')}
-                    variant={viewMode === 'tile' ? 'primary' : 'ghost'}
-                    className="rounded-none px-4 py-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
+                    {
+                      viewMode === 'grid' ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                        </svg>
+                      )
+                    }
                   </Button>
                 </div>
               </div>
