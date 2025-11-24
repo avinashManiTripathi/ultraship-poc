@@ -9,6 +9,7 @@ import GridView from './components/GridView';
 import TileView from './components/TileView';
 import DetailView from './components/DetailView';
 import AddEmployeeModal from './components/AddEmployeeModal';
+import ManageDepartments from './components/ManageDepartments';
 
 interface Employee {
   id: string;
@@ -34,6 +35,7 @@ function Dashboard() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showManageDepartments, setShowManageDepartments] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,12 +44,42 @@ function Dashboard() {
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState('ASC');
   const [departmentFilter, setDepartmentFilter] = useState<{ type: 'all' | 'department', value?: string }>({ type: 'all' });
+  const [departments, setDepartments] = useState<string[]>([]);
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchEmployees();
+      fetchDepartments();
     }
   }, [isAuthenticated, currentPage, searchTerm, sortBy, sortOrder, departmentFilter]);
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await fetch('/graphql', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          query: `
+            query {
+              departments {
+                name
+              }
+            }
+          `,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.data?.departments) {
+        setDepartments(result.data.departments.map((d: any) => d.name));
+      }
+    } catch (err) {
+      console.error('Failed to fetch departments:', err);
+    }
+  };
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -176,6 +208,8 @@ function Dashboard() {
         isOpen={isSidebarOpen} 
         onFilterChange={handleFilterChange}
         currentFilter={departmentFilter}
+        onManageDepartments={() => setShowManageDepartments(true)}
+        departments={departments}
       />
 
       <main className={`transition-all duration-300 pt-[57px] ${isSidebarOpen ? 'lg:ml-64' : ''}`}>
@@ -349,6 +383,16 @@ function Dashboard() {
         isOpen={showAddModal} 
         onClose={() => setShowAddModal(false)}
         onSuccess={fetchEmployees}
+        departments={departments}
+      />
+
+      {/* Manage Departments Modal */}
+      <ManageDepartments
+        isOpen={showManageDepartments}
+        onClose={() => {
+          setShowManageDepartments(false);
+          fetchDepartments(); // Refresh departments after managing
+        }}
       />
     </div>
   );

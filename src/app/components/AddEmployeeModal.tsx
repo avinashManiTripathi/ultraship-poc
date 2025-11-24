@@ -7,9 +7,10 @@ interface AddEmployeeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  departments: string[];
 }
 
-export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmployeeModalProps) {
+export default function AddEmployeeModal({ isOpen, onClose, onSuccess, departments }: AddEmployeeModalProps) {
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -22,7 +23,7 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
     attendance: '',
     email: '',
     phone: '',
-    department: 'Engineering',
+    department: '',
     position: '',
     joinDate: '',
     salary: '',
@@ -171,13 +172,10 @@ export default function AddEmployeeModal({ isOpen, onClose, onSuccess }: AddEmpl
                 onChange={(e) => setFormData({...formData, department: e.target.value})}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
               >
-                <option value="Engineering">Engineering</option>
-                <option value="Design">Design</option>
-                <option value="Operations">Operations</option>
-                <option value="Product">Product</option>
-                <option value="Data">Data</option>
-                <option value="Security">Security</option>
-                <option value="Management">Management</option>
+                <option value="">Select Department</option>
+                {departments.map((dept) => (
+                  <option key={dept} value={dept}>{dept}</option>
+                ))}
               </select>
             </div>
 

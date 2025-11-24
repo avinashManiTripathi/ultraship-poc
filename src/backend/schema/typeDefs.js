@@ -31,6 +31,18 @@ const typeDefs = gql`
     user: User!
   }
 
+  type Department {
+    id: ID!
+    name: String!
+    description: String
+    createdAt: String!
+  }
+
+  input DepartmentInput {
+    name: String!
+    description: String
+  }
+
   input EmployeeFilterInput {
     name: String
     department: String
@@ -115,6 +127,12 @@ const typeDefs = gql`
 
     # Get current user
     me: User
+
+    # Get all departments
+    departments: [Department!]!
+
+    # Get single department by ID
+    department(id: ID!): Department
   }
 
   type Mutation {
@@ -126,8 +144,12 @@ const typeDefs = gql`
     addEmployee(input: EmployeeInput!): Employee!
     updateEmployee(id: ID!, input: UpdateEmployeeInput!): Employee!
     deleteEmployee(id: ID!): Boolean!
+
+    # Department mutations (Admin only)
+    addDepartment(input: DepartmentInput!): Department!
+    updateDepartment(id: ID!, input: DepartmentInput!): Department!
+    deleteDepartment(id: ID!): Boolean!
   }
 `;
 
 module.exports = typeDefs;
-

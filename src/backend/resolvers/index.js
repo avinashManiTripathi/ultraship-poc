@@ -1,11 +1,12 @@
 const { GraphQLError } = require('graphql');
-const { employees, users } = require('../models/data');
+const { employees, users, departments } = require('../models/data');
 const { generateToken, hashPassword, comparePassword } = require('../utils/auth');
 const { isAdmin, isAdminOrEmployee } = require('../middleware/auth');
 
 // In-memory counters for new IDs
 let employeeIdCounter = employees.length + 1;
 let userIdCounter = users.length + 1;
+let departmentIdCounter = departments.length + 1;
 
 const resolvers = {
   Query: {
@@ -105,6 +106,24 @@ const resolvers = {
       }
       const user = users.find(u => u.id === context.user.id);
       return user;
+    },
+
+    // Get all departments
+    departments: (_, __, context) => {
+      isAdminOrEmployee(context);
+      return departments;
+    },
+
+    // Get single department by ID
+    department: (_, { id }, context) => {
+      isAdminOrEmployee(context);
+      const department = departments.find(dept => dept.id === id);
+      if (!department) {
+        throw new GraphQLError('Department not found', {
+          extensions: { code: 'NOT_FOUND' },
+        });
+      }
+      return department;
     },
   },
 
@@ -218,6 +237,73 @@ const resolvers = {
       }
 
       employees.splice(index, 1);
+      return true;
+    },
+
+    // Add department (Admin only)
+    addDepartment: (_, { input }, context) => {
+      isAdmin(context);
+
+      // Check if department already exists
+      const existing = departments.find(dept => dept.name.toLowerCase() === input.name.toLowerCase());
+      if (existing) {
+        throw new GraphQLError('Department already exists', {
+          extensions: { code: 'BAD_USER_INPUT' },
+        });
+      }
+
+      const newDepartment = {
+        id: String(departmentIdCounter++),
+        name: input.name,
+        description: input.description || '',
+        createdAt: new Date().toISOString(),
+      };
+
+      departments.push(newDepartment);
+      return newDepartment;
+    },
+
+    // Update department (Admin only)
+    updateDepartment: (_, { id, input }, context) => {
+      isAdmin(context);
+
+      const index = departments.findIndex(dept => dept.id === id);
+      if (index === -1) {
+        throw new GraphQLError('Department not found', {
+          extensions: { code: 'NOT_FOUND' },
+        });
+      }
+
+      departments[index] = {
+        ...departments[index],
+        ...input,
+      };
+
+      return departments[index];
+    },
+
+    // Delete department (Admin only)
+    deleteDepartment: (_, { id }, context) => {
+      isAdmin(context);
+
+      const index = departments.findIndex(dept => dept.id === id);
+      if (index === -1) {
+        throw new GraphQLError('Department not found', {
+          extensions: { code: 'NOT_FOUND' },
+        });
+      }
+
+      const deptName = departments[index].name;
+      
+      // Check if any employees are in this department
+      const employeesInDept = employees.filter(emp => emp.department === deptName);
+      if (employeesInDept.length > 0) {
+        throw new GraphQLError(`Cannot delete department. ${employeesInDept.length} employee(s) are assigned to this department.`, {
+          extensions: { code: 'BAD_USER_INPUT' },
+        });
+      }
+
+      departments.splice(index, 1);
       return true;
     },
   },

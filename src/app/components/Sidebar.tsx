@@ -7,17 +7,17 @@ interface SidebarProps {
   isOpen: boolean;
   onFilterChange: (filter: { type: 'all' | 'department', value?: string }) => void;
   currentFilter: { type: 'all' | 'department', value?: string };
+  onManageDepartments?: () => void;
+  departments: string[];
 }
 
-export default function Sidebar({ isOpen, onFilterChange, currentFilter }: SidebarProps) {
+export default function Sidebar({ isOpen, onFilterChange, currentFilter, onManageDepartments, departments }: SidebarProps) {
   const { isAdmin } = useAuth();
   const [openSubmenu, setOpenSubmenu] = useState<string | null>('employees');
 
   const toggleSubmenu = (menu: string) => {
     setOpenSubmenu(openSubmenu === menu ? null : menu);
   };
-
-  const departments = ['Engineering', 'Design', 'Operations', 'Product', 'Data', 'Security', 'Management'];
 
   return (
     <>
@@ -117,9 +117,12 @@ export default function Sidebar({ isOpen, onFilterChange, currentFilter }: Sideb
 
                 {openSubmenu === 'admin' && (
                   <div className="ml-4 mt-1 space-y-1">
-                    <a href="#" className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                      Settings
-                    </a>
+                    <button
+                      onClick={onManageDepartments}
+                      className="w-full text-left block px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                      Manage Departments
+                    </button>
                   </div>
                 )}
               </div>
