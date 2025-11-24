@@ -167,21 +167,18 @@ const resolvers = {
       }
     },
 
-    // Get current user
+    // Get current user (returns null if not authenticated - no error thrown)
     me: async (_: any, __: any, context: IContext) => {
+      // Return null silently if not authenticated (used for session checking)
       if (!context.user) {
-        throw new GraphQLError('Not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
+        return null;
       }
 
       try {
         const user = await User.findById(context.user.id).select('-password').lean();
         
         if (!user) {
-          throw new GraphQLError('User not found', {
-            extensions: { code: 'NOT_FOUND' },
-          });
+          return null;
         }
 
         return {
@@ -189,9 +186,8 @@ const resolvers = {
           id: user._id.toString()
         };
       } catch (error) {
-        throw new GraphQLError('Failed to fetch user', {
-          extensions: { code: 'INTERNAL_SERVER_ERROR' },
-        });
+        console.error('Error fetching user:', error);
+        return null;
       }
     },
 

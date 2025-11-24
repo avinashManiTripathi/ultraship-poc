@@ -63,7 +63,11 @@ async function startServer(): Promise<void> {
     typeDefs,
     resolvers,
     formatError: (error) => {
-      console.error('GraphQL Error:', error);
+      // Only log errors that aren't expected authentication checks
+      const code = error.extensions?.code;
+      if (code !== 'UNAUTHENTICATED' && code !== 'FORBIDDEN') {
+        console.error('GraphQL Error:', error);
+      }
       return error;
     },
   });
